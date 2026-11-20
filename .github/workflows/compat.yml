@@ -1,0 +1,150 @@
+# The compatibility matrix: the Plugin Manager run inside Akai's MPC firmware under QEngine, one job per machine in machines.json,
+# then one page made from all the results. Started by hand (Actions > compat > Run workflow) when the Manager or the installers
+# change, or when new firmware comes out.
+#
+# The firmware is fetched in each job from the private release in machines.json's firmware_repo, with FIRMWARE_TOKEN (a
+# fine-grained token that can read that one repository's contents), and checked against the sha256 in machines.json. Nothing
+# built from it is cached or uploaded: the artifacts hold summaries, screen captures and the Manager's own logs only.
+name: compat
+
+on:
+  workflow_dispatch:
+    inputs:
+      plugin_manager:
+        description: "Plugin Manager: owner/repo@ref"
+        default: "jacob-sabella/plugin-manager@reliability-qengine"
+      mpc_vst:
+        description: "mpc-vst-plugins (installers): owner/repo@ref"
+        default: "jacob-sabella/mpc-vst-plugins@fix/pm-reliability"
+      qengine_ref:
+        description: "QEngine commit (Peyton-C/QEngine)"
+        default: "83a03e5"
+      machines:
+        description: "Instances from machines.json, space separated (empty: all)"
+        default: ""
+      scenarios:
+        description: "Scenario names, space separated (empty: all)"
+        default: ""
+
+concurrency:
+  group: compat
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.m.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: m
+        env:
+          PICK: ${{ inputs.machines }}
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          ms = json.load(open("machines.json"))["machines"]
+          pick = os.environ["PICK"].split()
+          unknown = set(pick) - {m["instance"] for m in ms}
+          if unknown: raise SystemExit("not in machines.json: %s" % " ".join(sorted(unknown)))
+          ms = [m for m in ms if not pick or m["instance"] in pick]
+          print("matrix=" + json.dumps({"include": ms}))
+          PY
+
+  machine:
+    needs: plan
+    runs-on: ubuntu-24.04
+    # FIRMWARE_TOKEN is a repository secret while this repository is private on GitHub Free (no environments there). In a public
+    # repository, move it to an environment "firmware" restricted to the default branch and add: environment: firmware
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      PM: ${{ github.workspace }}/plugin-manager
+      MPC_VST: ${{ github.workspace }}/mpc-vst-plugins
+      QENGINE: ${{ github.workspace }}/QEngine
+      FIRMWARE_DIR: ${{ runner.temp }}/firmware
+    steps:
+      - uses: actions/checkout@v4
+        with: { path: compat }
+      - name: Sources under test
+        env:
+          PMS: ${{ inputs.plugin_manager }}
+          VSTS: ${{ inputs.mpc_vst }}
+          QREF: ${{ inputs.qengine_ref }}
+        run: |
+          clone() { git clone -q --filter=blob:none "https://github.com/${1%@*}" "$2" && git -C "$2" checkout -q "${1#*@}"; }
+          clone "$PMS" "$PM"; clone "$VSTS" "$MPC_VST"; clone "Peyton-C/QEngine@$QREF" "$QENGINE"
+          for d in "$PM" "$MPC_VST" "$QENGINE"; do echo "$(basename "$d") $(git -C "$d" rev-parse HEAD)"; done | tee sources.txt
+
+      - name: Firmware (private release, checked against machines.json)
+        env:
+          GH_TOKEN: ${{ secrets.FIRMWARE_TOKEN }}
+        run: |
+          mkdir -p "$FIRMWARE_DIR"
+          repo=$(python3 -c 'import json;print(json.load(open("compat/machines.json"))["firmware_repo"])')
+          gh release download images --repo "$repo" --pattern "${{ matrix.image }}" --dir "$FIRMWARE_DIR"
+          echo "${{ matrix.sha256 }}  $FIRMWARE_DIR/${{ matrix.image }}" | sha256sum -c -
+
+      - name: Instance (built in every job; it holds the firmware's files, so it is never cached)
+        working-directory: plugin-manager
+        run: |
+          docker build -q -t pm-emu-host tests/emu
+          tests/emu/qe scripts/build_scripts/new_instance.sh --name "${{ matrix.instance }}" --product-code "${{ matrix.code }}" --firmware "$FIRMWARE_DIR/${{ matrix.image }}"
+
+      - name: Build the Manager and the fixture
+        working-directory: plugin-manager
+        run: |
+          [ -d vst/build/skin ] || vst/build_themes.sh armv7
+          tests/emu/build.sh
+
+      - name: Scenarios
+        working-directory: plugin-manager
+        env:
+          KS: ${{ inputs.scenarios }}
+        run: |
+          args=(-i "${{ matrix.instance }}"); for k in $KS; do args+=(-k "$k"); done
+          tests/emu/run.sh "${args[@]}"
+
+      - name: Results (no firmware files)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: results-${{ matrix.instance }}
+          path: |
+            plugin-manager/tests/emu/results/${{ matrix.instance }}/**/summary.json
+            plugin-manager/tests/emu/results/${{ matrix.instance }}/**/*.png
+            plugin-manager/tests/emu/results/${{ matrix.instance }}/**/*.log
+            plugin-manager/tests/emu/results/${{ matrix.instance }}/**/*-result
+            plugin-manager/tests/emu/results/${{ matrix.instance }}/**/*-device.txt
+            plugin-manager/tests/emu/results/${{ matrix.instance }}-*.log
+            sources.txt
+          retention-days: 30
+
+  report:
+    needs: machine
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Harness (for the scenario order and descriptions)
+        env:
+          PMS: ${{ inputs.plugin_manager }}
+        run: git clone -q --filter=blob:none "https://github.com/${PMS%@*}" pm && git -C pm checkout -q "${PMS#*@}"
+      - uses: actions/download-artifact@v4
+        with: { pattern: results-*, path: art }
+      - name: Page
+        run: |
+          mkdir -p results
+          for d in art/results-*; do cp -r "$d"/plugin-manager/tests/emu/results/. results/ 2>/dev/null || true; done
+          HARNESS=pm/tests/emu PM=pm python3 report.py --results results --machines machines.json --out site
+          { echo "### Compatibility"; echo; echo "Sources:"; cat art/*/sources.txt | sort -u | sed 's/^/- /'; } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: compat-page
+          path: site
+          retention-days: 90
