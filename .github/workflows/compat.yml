@@ -174,7 +174,7 @@ jobs:
           ref="$REGISTRY:${{ matrix.instance }}-$id"
           if docker pull -q "$ref" 2>/dev/null; then
             c=$(docker create "$ref" x); docker cp "$c:/machine.tar.zst" - | tar -xOf - | zstd -dc | tar -C "$GITHUB_WORKSPACE" --sparse -xf -
-            docker rm -q "$c" >/dev/null; docker rmi -q "$ref" >/dev/null
+            docker rm "$c" >/dev/null; docker rmi "$ref" >/dev/null
             echo "have=1" >> "$GITHUB_OUTPUT"; echo "${{ matrix.instance }} ${{ matrix.shard }}/${{ matrix.of }}: prebuilt machine $id" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "::warning::No prebuilt image $ref: building the instance and the machine snapshot in this job (run the images workflow)"
