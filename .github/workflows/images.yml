@@ -133,7 +133,7 @@ jobs:
       - name: Machine snapshot
         if: steps.id.outputs.have != '1'
         working-directory: plugin-manager
-        run: tests/emu/run.sh -i "${{ matrix.instance }}" --machine
+        run: tests/emu/run.sh -i "${{ matrix.instance }}" --machine || { tail -n 80 "tests/emu/results/${{ matrix.instance }}-work.log"; exit 1; }
       - name: Image (private)
         if: steps.id.outputs.have != '1'
         run: |
