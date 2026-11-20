@@ -78,8 +78,59 @@ jobs:
           print("matrix=" + json.dumps({"include": inc}))
           PY
 
+  build:
+    # The Manager and the fixture (no firmware): built once, every shard downloads it.
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Sources under test
+        env:
+          PMS: ${{ inputs.plugin_manager }}
+          VSTS: ${{ inputs.mpc_vst }}
+        run: |
+          clone() { git clone -q --filter=blob:none "https://github.com/${1%@*}" "$2" && git -C "$2" checkout -q "${1#*@}"; }
+          clone "$PMS" plugin-manager; clone "$VSTS" mpc-vst-plugins
+          echo "BUILD_KEY=build-$(git -C plugin-manager rev-parse HEAD)-$(git -C mpc-vst-plugins rev-parse HEAD)" >> "$GITHUB_ENV"
+      # The same two commits built before: the result is reused as it is (the Manager and the fixture only, no firmware).
+      - id: built
+        uses: actions/cache@v4
+        with:
+          path: plugin-manager/tests/emu/build/fx/work
+          key: ${{ env.BUILD_KEY }}
+      - if: steps.built.outputs.cache-hit != 'true'
+        uses: docker/setup-qemu-action@v3
+        with: { platforms: "arm64,arm" }
+      - name: Compiler images cache (public gcc images)
+        if: steps.built.outputs.cache-hit != 'true'
+        id: gcc
+        uses: actions/cache@v4
+        with:
+          path: /tmp/gcc-images
+          key: gcc-images-arm32v7-gcc11-bullseye-arm64v8-gcc12-bookworm-v1
+      - name: Compiler images
+        if: steps.built.outputs.cache-hit != 'true'
+        run: |
+          if [ -f /tmp/gcc-images/gcc.tar ]; then docker load -q -i /tmp/gcc-images/gcc.tar; else
+            docker pull -q --platform linux/arm/v7 arm32v7/gcc:11-bullseye && docker pull -q --platform linux/arm64 arm64v8/gcc:12-bookworm
+            mkdir -p /tmp/gcc-images && docker save -o /tmp/gcc-images/gcc.tar arm32v7/gcc:11-bullseye arm64v8/gcc:12-bookworm; fi
+      - name: Skin cache (the project's own artwork)
+        if: steps.built.outputs.cache-hit != 'true'
+        uses: actions/cache@v4
+        with:
+          path: plugin-manager/vst/build
+          key: skin-${{ hashFiles('plugin-manager/vst/layout.conf', 'plugin-manager/vst/skin.css', 'plugin-manager/vst/vst.json', 'plugin-manager/vst/params.json', 'plugin-manager/vst/make_*.py', 'plugin-manager/vst/skin_post.py', 'plugin-manager/vst/skin_taps.py', 'plugin-manager/vst/build_themes.sh', 'plugin-manager/vst/images/**') }}
+      - name: Build
+        if: steps.built.outputs.cache-hit != 'true'
+        env:
+          MPC_VST: ${{ github.workspace }}/mpc-vst-plugins
+        run: plugin-manager/tests/emu/build.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: manager-build
+          path: plugin-manager/tests/emu/build/fx/work
+          retention-days: 3
+
   machine:
-    needs: plan
+    needs: [plan, build]
     name: ${{ matrix.instance }} ${{ matrix.shard }}/${{ matrix.of }}
     runs-on: ubuntu-24.04
     # FIRMWARE_TOKEN is a repository secret while this repository is private on GitHub Free (no environments there). In a public
@@ -147,11 +198,9 @@ jobs:
         working-directory: plugin-manager
         run: tests/emu/qe scripts/build_scripts/new_instance.sh --name "${{ matrix.instance }}" --product-code "${{ matrix.code }}" --firmware "$FIRMWARE_DIR/${{ matrix.image }}"
 
-      - name: Build the Manager and the fixture
-        working-directory: plugin-manager
-        run: |
-          [ -d vst/build/skin ] || vst/build_themes.sh armv7
-          tests/emu/build.sh
+      - name: The Manager and the fixture (from the build job)
+        uses: actions/download-artifact@v4
+        with: { name: manager-build, path: plugin-manager/tests/emu/build/fx/work }
 
       - name: Scenarios (${{ matrix.ks }})
         working-directory: plugin-manager
