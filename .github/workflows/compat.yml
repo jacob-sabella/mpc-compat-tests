@@ -67,7 +67,7 @@ jobs:
       PM: ${{ github.workspace }}/plugin-manager
       MPC_VST: ${{ github.workspace }}/mpc-vst-plugins
       QENGINE: ${{ github.workspace }}/QEngine
-      FIRMWARE_DIR: ${{ runner.temp }}/firmware
+      FIRMWARE_DIR: /tmp/pm-firmware        # (job env cannot use the runner context)
     steps:
       - uses: actions/checkout@v4
         with: { path: compat }
