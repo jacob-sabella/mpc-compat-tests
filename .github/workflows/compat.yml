@@ -141,7 +141,11 @@ jobs:
         run: |
           mkdir -p results
           for d in art/results-*; do cp -r "$d"/plugin-manager/tests/emu/results/. results/ 2>/dev/null || true; done
-          HARNESS=pm/tests/emu PM=pm python3 report.py --results results --machines machines.json --out site
+          if ls results/*/work/summary.json >/dev/null 2>&1; then
+            HARNESS=pm/tests/emu PM=pm python3 report.py --results results --machines machines.json --out site
+          else
+            echo "::warning::No machine produced results; no page. See the machine jobs."; mkdir -p site
+          fi
           { echo "### Compatibility"; echo; echo "Sources:"; cat art/*/sources.txt | sort -u | sed 's/^/- /'; } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         with:
