@@ -90,6 +90,10 @@ jobs:
           gh release download images --repo "$repo" --pattern "${{ matrix.image }}" --dir "$FIRMWARE_DIR"
           echo "${{ matrix.sha256 }}  $FIRMWARE_DIR/${{ matrix.image }}" | sha256sum -c -
 
+      # QEngine builds its shims in an ARM container: the runner needs binfmt for arm64 and arm.
+      - uses: docker/setup-qemu-action@v3
+        with: { platforms: "arm64,arm" }
+
       - name: Instance (built in every job; it holds the firmware's files, so it is never cached)
         working-directory: plugin-manager
         run: |
