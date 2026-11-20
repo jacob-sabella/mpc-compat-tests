@@ -100,6 +100,7 @@ jobs:
           clone() { git clone -q --filter=blob:none "https://github.com/${1%@*}" "$2" && git -C "$2" checkout -q "${1#*@}"; }
           clone "$PMS" "$PM"; clone "Peyton-C/QEngine@$QREF" "$QENGINE"; mkdir -p "$MPC_VST"
           echo "PM_QENGINE_REF=$(git -C "$QENGINE" rev-parse HEAD)" >> "$GITHUB_ENV"
+          mkdir -p "$FIRMWARE_DIR"     # before qe mounts it: Docker would make it, as root
       - name: Emulator host
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin

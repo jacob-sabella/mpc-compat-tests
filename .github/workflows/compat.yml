@@ -108,6 +108,7 @@ jobs:
           clone "$PMS" "$PM"; clone "$VSTS" "$MPC_VST"; clone "Peyton-C/QEngine@$QREF" "$QENGINE"
           for d in "$PM" "$MPC_VST" "$QENGINE"; do echo "$(basename "$d") $(git -C "$d" rev-parse HEAD)"; done | tee sources.txt
           echo "PM_QENGINE_REF=$(git -C "$QENGINE" rev-parse HEAD)" >> "$GITHUB_ENV"
+          mkdir -p "$FIRMWARE_DIR"     # before qe mounts it: Docker would make it, as root
 
       - name: Emulator host (prebuilt, else built here)
         run: |
