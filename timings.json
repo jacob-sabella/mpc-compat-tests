@@ -1,0 +1,70 @@
+{
+ "note": "Seconds per scenario on a desktop (QEMU TCG), from the harness's summary.json; used only to balance shards.",
+ "instances": {
+  "mpc-g1-3101": {
+   "fresh_install": 14,
+   "plugin_install_update_remove": 276,
+   "addin_install_remove": 182,
+   "self_update": 172,
+   "long_press": 26,
+   "theme_survives_update": 297,
+   "drive_name_with_space": 263,
+   "exfat_noexec_drive": 167,
+   "full_disk": 334,
+   "readonly_addins": 43,
+   "power_cut_mid_apply": 343,
+   "catalog_retry": 32,
+   "vst2_plugin_json": 43
+  },
+  "mpc-g1-391": {
+   "fresh_install": 15,
+   "plugin_install_update_remove": 277,
+   "addin_install_remove": 188,
+   "self_update": 197,
+   "long_press": 29,
+   "theme_survives_update": 327,
+   "drive_name_with_space": 507,
+   "exfat_noexec_drive": 179,
+   "full_disk": 360,
+   "readonly_addins": 44,
+   "power_cut_mid_apply": 315,
+   "catalog_retry": 32,
+   "vst2_plugin_json": 125
+  },
+  "mpc-g2-3100": {
+   "fresh_install": 5,
+   "plugin_install_update_remove": 168,
+   "addin_install_remove": 93,
+   "self_update": 100,
+   "long_press": 16,
+   "theme_survives_update": 192,
+   "drive_name_with_space": 358,
+   "exfat_noexec_drive": 119,
+   "full_disk": 184,
+   "readonly_addins": 16,
+   "power_cut_mid_apply": 213,
+   "catalog_retry": 25,
+   "vst2_plugin_json": 86
+  },
+  "mpc-g2-3101": {
+   "fresh_install": 5,
+   "plugin_install_update_remove": 163,
+   "addin_install_remove": 90,
+   "self_update": 99,
+   "long_press": 16,
+   "theme_survives_update": 190,
+   "drive_name_with_space": 167,
+   "exfat_noexec_drive": 121,
+   "full_disk": 177,
+   "readonly_addins": 15,
+   "power_cut_mid_apply": 213,
+   "catalog_retry": 25,
+   "vst2_plugin_json": 14
+  },
+  "mpc-x-391": {
+   "fresh_install": 18,
+   "plugin_install_update_remove": 273,
+   "long_press": 28
+  }
+ }
+}

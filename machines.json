@@ -1,10 +1,41 @@
 {
-  "firmware_repo": "jacob-sabella/mpc-firmware",
-  "machines": [
-    {"instance": "mpc-g1-391",  "code": "ACVA", "image": "MPC-3.9.1-Gen1-update.img",  "sha256": "4c0f7797a006313fad206f9513eca8b3823e834c9e0941a6b5f088386cb835d6"},
-    {"instance": "mpc-x-391",   "code": "ACV5", "image": "MPC-3.9.1-Gen1-update.img",  "sha256": "4c0f7797a006313fad206f9513eca8b3823e834c9e0941a6b5f088386cb835d6"},
-    {"instance": "mpc-g2-3100", "code": "ACVG", "image": "MPC-3.10.0-Gen2-update.img", "sha256": "c5b941e1b07d261a58b41784e2ff4f911b3ca4dd25969698eaa35aa706d9dec2"},
-    {"instance": "mpc-g1-3101", "code": "ACVA", "image": "MPC-3.10.1-Gen1-update.img", "sha256": "1df320c8b4f8a5ce4f212a6b89d6009bed3e794278a0ecb0ed609a5f0bf55364"},
-    {"instance": "mpc-g2-3101", "code": "ACVG", "image": "MPC-3.10.1-Gen2-update.img", "sha256": "b24857470114d354e370ffaecfb44a83ed435bf7dff65d8b982ebc8cac475b0a"}
-  ]
+ "firmware_repo": "jacob-sabella/mpc-firmware",
+ "machines": [
+  {
+   "instance": "mpc-g1-391",
+   "code": "ACVA",
+   "image": "MPC-3.9.1-Gen1-update.img",
+   "sha256": "4c0f7797a006313fad206f9513eca8b3823e834c9e0941a6b5f088386cb835d6",
+   "shards": 4
+  },
+  {
+   "instance": "mpc-x-391",
+   "code": "ACV5",
+   "image": "MPC-3.9.1-Gen1-update.img",
+   "sha256": "4c0f7797a006313fad206f9513eca8b3823e834c9e0941a6b5f088386cb835d6",
+   "shards": 4
+  },
+  {
+   "instance": "mpc-g2-3100",
+   "code": "ACVG",
+   "image": "MPC-3.10.0-Gen2-update.img",
+   "sha256": "c5b941e1b07d261a58b41784e2ff4f911b3ca4dd25969698eaa35aa706d9dec2",
+   "shards": 2
+  },
+  {
+   "instance": "mpc-g1-3101",
+   "code": "ACVA",
+   "image": "MPC-3.10.1-Gen1-update.img",
+   "sha256": "1df320c8b4f8a5ce4f212a6b89d6009bed3e794278a0ecb0ed609a5f0bf55364",
+   "shards": 4
+  },
+  {
+   "instance": "mpc-g2-3101",
+   "code": "ACVG",
+   "image": "MPC-3.10.1-Gen2-update.img",
+   "sha256": "b24857470114d354e370ffaecfb44a83ed435bf7dff65d8b982ebc8cac475b0a",
+   "shards": 2
+  }
+ ],
+ "note": "shards: how many parallel jobs a full run of this machine is split into (timings.json balances them). Gen1 (32-bit) is the slow one."
 }

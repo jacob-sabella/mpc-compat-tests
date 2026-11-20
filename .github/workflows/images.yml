@@ -1,0 +1,148 @@
+# Prebuilt machines: for each machine in machines.json, the QEngine instance and the harness's "machine" snapshot (MPC OS booted,
+# the internal drive set up, the Enhancements switches on; no Plugin Manager yet), so a compat job starts in a minute or two instead
+# of building the instance (about 12 minutes on a hosted runner) and booting MPC.
+#
+# They hold Akai's firmware files, so they are PRIVATE packages (ghcr.io/<owner>/mpc-compat-machine), pulled with this repository's
+# GITHUB_TOKEN; never make the package public. Also pushed: the emulator host image (QEMU, no firmware), tag host-<Dockerfile hash>,
+# so the QEMU that saved a snapshot is the QEMU that loads it.
+#
+# A machine image is tagged <instance>-<machine id>; the id (tests/emu/machine.py) covers the firmware's sha256, the product code,
+# QEngine's commit, QEMU's version, machine.py and the QEMU shim. A run builds only the images that are missing (or all, with force).
+name: images
+
+on:
+  workflow_dispatch:
+    inputs:
+      plugin_manager:
+        description: "Plugin Manager (the harness): owner/repo@ref"
+        default: "jacob-sabella/plugin-manager@reliability-qengine"
+      qengine_ref:
+        description: "QEngine commit (Peyton-C/QEngine)"
+        default: "83a03e5"
+      machines:
+        description: "Instances from machines.json, space separated (empty: all)"
+        default: ""
+      force:
+        description: "Rebuild images that already exist"
+        type: boolean
+        default: false
+
+concurrency:
+  group: images
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io/${{ github.repository_owner }}/mpc-compat-machine
+
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.m.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: m
+        env:
+          PICK: ${{ inputs.machines }}
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          ms = json.load(open("machines.json"))["machines"]
+          pick = os.environ["PICK"].split()
+          unknown = set(pick) - {m["instance"] for m in ms}
+          if unknown: raise SystemExit("not in machines.json: %s" % " ".join(sorted(unknown)))
+          print("matrix=" + json.dumps({"include": [m for m in ms if not pick or m["instance"] in pick]}))
+          PY
+
+  host:
+    runs-on: ubuntu-24.04
+    outputs:
+      tag: ${{ steps.h.outputs.tag }}
+    steps:
+      - name: Harness
+        env:
+          PMS: ${{ inputs.plugin_manager }}
+        run: git clone -q --filter=blob:none "https://github.com/${PMS%@*}" pm && git -C pm checkout -q "${PMS#*@}"
+      - id: h
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          tag="host-$(sha256sum pm/tests/emu/Dockerfile | cut -c1-12)"; echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          if docker manifest inspect "$REGISTRY:$tag" >/dev/null 2>&1; then echo "host image $tag exists"; exit 0; fi
+          docker build -q -t "$REGISTRY:$tag" --label "org.opencontainers.image.source=https://github.com/${{ github.repository }}" pm/tests/emu
+          docker push -q "$REGISTRY:$tag"
+
+  machine:
+    needs: [plan, host]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      PM: ${{ github.workspace }}/plugin-manager
+      MPC_VST: ${{ github.workspace }}/mpc-vst-plugins
+      QENGINE: ${{ github.workspace }}/QEngine
+      FIRMWARE_DIR: /tmp/pm-firmware        # (job env cannot use the runner context)
+      PM_FIRMWARE_SHA256: ${{ matrix.sha256 }}
+      PM_PRODUCT_CODE: ${{ matrix.code }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { path: compat }
+      - name: Sources
+        env:
+          PMS: ${{ inputs.plugin_manager }}
+          QREF: ${{ inputs.qengine_ref }}
+        run: |
+          clone() { git clone -q --filter=blob:none "https://github.com/${1%@*}" "$2" && git -C "$2" checkout -q "${1#*@}"; }
+          clone "$PMS" "$PM"; clone "Peyton-C/QEngine@$QREF" "$QENGINE"; mkdir -p "$MPC_VST"
+          echo "PM_QENGINE_REF=$(git -C "$QENGINE" rev-parse HEAD)" >> "$GITHUB_ENV"
+      - name: Emulator host
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          docker pull -q "$REGISTRY:${{ needs.host.outputs.tag }}" && docker tag "$REGISTRY:${{ needs.host.outputs.tag }}" pm-emu-host
+      - id: id
+        name: Machine id
+        run: |
+          id=$("$PM/tests/emu/qe" python3 "$PM/tests/emu/machine.py" --id "${{ matrix.instance }}")
+          echo "tag=${{ matrix.instance }}-$id" >> "$GITHUB_OUTPUT"
+          if [ "${{ inputs.force }}" != true ] && docker manifest inspect "$REGISTRY:${{ matrix.instance }}-$id" >/dev/null 2>&1; then
+            echo "have=1" >> "$GITHUB_OUTPUT"; echo "${{ matrix.instance }}: $REGISTRY:${{ matrix.instance }}-$id exists" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - if: steps.id.outputs.have != '1'
+        uses: docker/setup-qemu-action@v3
+        with: { platforms: "arm64,arm" }
+      - name: Firmware (private release, checked against machines.json)
+        if: steps.id.outputs.have != '1'
+        env:
+          GH_TOKEN: ${{ secrets.FIRMWARE_TOKEN }}
+        run: |
+          mkdir -p "$FIRMWARE_DIR"
+          repo=$(python3 -c 'import json;print(json.load(open("compat/machines.json"))["firmware_repo"])')
+          gh release download images --repo "$repo" --pattern "${{ matrix.image }}" --dir "$FIRMWARE_DIR"
+          echo "${{ matrix.sha256 }}  $FIRMWARE_DIR/${{ matrix.image }}" | sha256sum -c -
+      - name: Instance
+        if: steps.id.outputs.have != '1'
+        working-directory: plugin-manager
+        run: tests/emu/qe scripts/build_scripts/new_instance.sh --name "${{ matrix.instance }}" --product-code "${{ matrix.code }}" --firmware "$FIRMWARE_DIR/${{ matrix.image }}"
+      - name: Machine snapshot
+        if: steps.id.outputs.have != '1'
+        working-directory: plugin-manager
+        run: tests/emu/run.sh -i "${{ matrix.instance }}" --machine
+      - name: Image (private)
+        if: steps.id.outputs.have != '1'
+        run: |
+          i="${{ matrix.instance }}"; tag="${{ steps.id.outputs.tag }}"
+          mkdir -p img
+          tar -C "$GITHUB_WORKSPACE" --sparse -cf - QEngine/build/vmlinuz-* QEngine/build/initrd-* "QEngine/build/instances/$i" \
+              "plugin-manager/tests/emu/state/$i/machine" plugin-manager/tests/emu/state/guest_key plugin-manager/tests/emu/state/guest_key.pub \
+            | zstd -q -T0 -12 -o img/machine.tar.zst
+          printf 'FROM scratch\nCOPY machine.tar.zst /\n' > img/Dockerfile
+          docker build -q -t "$REGISTRY:$tag" --label "org.opencontainers.image.source=https://github.com/${{ github.repository }}" img
+          docker push -q "$REGISTRY:$tag"
+          echo "$i: pushed $REGISTRY:$tag, $(du -h img/machine.tar.zst | cut -f1) compressed" >> "$GITHUB_STEP_SUMMARY"
+          rm -rf img "$FIRMWARE_DIR"

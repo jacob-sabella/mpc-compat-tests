@@ -12,7 +12,24 @@ Actions > **compat** > Run workflow. The inputs say which Plugin Manager, instal
 as `owner/repo@ref`, and optionally which machines and scenarios. A run is meant for when the Manager or the installers
 change, or when new firmware comes out.
 
-Each machine is its own job. The page is the `compat-page` artifact of the run; open `index.html`.
+Each machine is split into shards, parallel jobs that each run part of its scenarios (`shards` in `machines.json`, balanced by the
+desktop timings in `timings.json`; a small run gets fewer). The report job merges them (`merge.py`) and makes the page, the
+`compat-page` artifact of the run; open `index.html`.
+
+## Prebuilt machines
+
+A job starts from a prebuilt image of its machine when one matches: the QEngine instance and the harness's "machine" snapshot
+(MPC OS booted, the internal drive set up, the Enhancements switches on; no Plugin Manager). Without one, the job builds the instance
+(about 12 minutes on a hosted runner) and boots MPC itself, and the run's summary says so.
+
+Actions > **images** > Run workflow builds the images that are missing. Run it after changing the firmware, QEngine, QEMU (the
+harness's Dockerfile) or the harness's `machine.py` or QEMU shim: the image tag is `<instance>-<machine id>`, and the id covers all of
+those (`tests/emu/machine.py`), so a stale image is never used, just not found.
+
+The images hold Akai's firmware files. They are **private** packages (`ghcr.io/<owner>/mpc-compat-machine`), read by this
+repository's own token; never make the package public. The emulator host image (QEMU, no firmware) is in the same package, tagged
+`host-<hash of the Dockerfile>`. Old tags are not removed by the workflow: delete them under the package's settings now and then.
+Private package storage over GitHub Free's 500 MB is billed (about $0.25 per GB a month).
 
 ## Firmware
 
