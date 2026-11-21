@@ -3,8 +3,13 @@
 The OpenMPC Plugin Manager run inside Akai's own MPC firmware under emulation ([QEngine](https://github.com/Peyton-C/QEngine)),
 on each machine and firmware in `machines.json`. The result is one page: scenarios down the side, machines across the top.
 
-The harness itself (scenarios, the emulator driver) is in the Plugin Manager repository under `tests/emu`. This repository
-picks the machines, fetches the firmware, runs the harness on each and makes the page (`report.py`).
+The tests and the emulator driver are in `emu/`. The rest of this repository picks the machines, fetches the firmware, runs the
+tests on each and makes the page (`report.py`). Locally, with `plugin-manager`, `QEngine` and `mpc-vst-plugins` checked out
+beside this repository (or named by `PM`, `QENGINE` and `MPC_VST`): `emu/build.sh`, then `emu/run.sh`. See `emu/README.md`.
+
+## Credits
+
+The emulation is [QEngine](https://github.com/Peyton-C/QEngine), by [Peyton Cashin (Peyton-C)](https://github.com/Peyton-C) and [contributors](https://github.com/Peyton-C/QEngine/graphs/contributors). These tests would not exist without it.
 
 ## Latest results
 
@@ -40,7 +45,7 @@ A job starts from a prebuilt image of its machine when one matches: the QEngine 
 
 Actions > **images** > Run workflow builds the images that are missing. Run it after changing the firmware, QEngine, QEMU (the
 harness's Dockerfile) or the harness's `machine.py` or QEMU shim: the image tag is `<instance>-<machine id>`, and the id covers all of
-those (`tests/emu/machine.py`), so a stale image is never used, just not found.
+those (`emu/machine.py`), so a stale image is never used, just not found.
 
 The images hold Akai's firmware files. They are **private** packages (`ghcr.io/<owner>/mpc-compat-machine`), read by this
 repository's own token; never make the package public. The emulator host image (QEMU, no firmware) is in the same package, tagged

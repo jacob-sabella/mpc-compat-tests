@@ -8,8 +8,8 @@ Nothing here needs the emulator or the firmware: only results/, and the instance
 import argparse, datetime, glob, hashlib, html, json, os, shutil, subprocess
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-HARNESS = os.environ.get("HARNESS") or HERE                     # the harness: scenarios.py, results/
-PM = os.environ.get("PM") or os.path.dirname(os.path.dirname(HARNESS))
+HARNESS = os.environ.get("HARNESS") or os.path.join(HERE, "emu")                     # the harness: scenarios.py, results/
+PM = os.environ.get("PM") or os.path.join(os.path.dirname(HERE), "plugin-manager")
 QENGINE = os.environ.get("QENGINE") or os.path.join(os.path.dirname(PM), "QEngine")
 MPC_VST = os.environ.get("MPC_VST") or os.path.join(os.path.dirname(os.path.dirname(PM)), "open-mpc")
 
@@ -169,7 +169,7 @@ def build(label, out, results):
 <h2>What was tested</h2><div class="cards">%s</div><ul class="plain" style="margin-top:12px">%s</ul>
 <h2>What this does not cover</h2><ul class="plain">%s</ul>
 <h2>Details</h2>%s
-<footer>Made by tests/emu/report.py on %s UTC. The firmware is Akai's and is not distributed with these tests or this page.</footer>
+<footer>Made by report.py on %s UTC. Emulation by <a href="https://github.com/Peyton-C/QEngine">QEngine</a>, by <a href="https://github.com/Peyton-C">Peyton Cashin (Peyton-C)</a> and <a href="https://github.com/Peyton-C/QEngine/graphs/contributors">contributors</a>. The firmware is Akai's and is not distributed with these tests or this page.</footer>
 </main></body></html>""" % (CSS, total, len(machines), "%d failed" % failed if failed else "all passed", cols, "".join(rows), cards, tested,
                            "".join("<li>%s</li>" % e(t) for t in limits), "".join(d for _, d in sorted(details, key=lambda x: not x[0])),
                            datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M"))
