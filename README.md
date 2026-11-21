@@ -6,6 +6,22 @@ on each machine and firmware in `machines.json`. The result is one page: scenari
 The harness itself (scenarios, the emulator driver) is in the Plugin Manager repository under `tests/emu`. This repository
 picks the machines, fetches the firmware, runs the harness on each and makes the page (`report.py`).
 
+## Latest results
+
+**[Open the full report](https://jacob-sabella.github.io/mpc-compat-tests/)**: 141 of 141 checks passed on 2026-11-21.
+
+| Machine | Passed |
+|---|---|
+| MPC Live III, MPC OS 3.10.1 | 25 of 25 |
+| MPC Live III, MPC OS 3.10.0 | 25 of 25 |
+| MPC One, MPC OS 3.10.1 | 25 of 25 |
+| MPC X, MPC OS 3.9.1 | 25 of 25 |
+| MPC One, MPC OS 3.9.1 | 25 of 25 |
+| MPC Sample 1.3.0 | 16 of 16 |
+
+These ran under emulation on a desktop, not on real hardware. They combine three runs: 95 checks from a full run, 28 addin checks
+rerun after an installer fix, and 18 install checks rerun on the final rebased code.
+
 ## Running it
 
 Actions > **compat** > Run workflow. The inputs say which Plugin Manager, installers (mpc-vst-plugins) and QEngine to test,
