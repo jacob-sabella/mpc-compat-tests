@@ -78,6 +78,7 @@ jobs:
   machine:
     needs: [plan, host]
     runs-on: ubuntu-24.04
+    environment: firmware   # holds FIRMWARE_TOKEN; only the default branch can use it
     timeout-minutes: 90
     strategy:
       fail-fast: false

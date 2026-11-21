@@ -141,8 +141,7 @@ jobs:
     needs: [plan, build]
     name: ${{ matrix.instance }} ${{ matrix.shard }}/${{ matrix.of }}
     runs-on: ubuntu-24.04
-    # FIRMWARE_TOKEN is a repository secret while this repository is private on GitHub Free (no environments there). In a public
-    # repository, move it to an environment "firmware" restricted to the default branch and add: environment: firmware
+    environment: firmware   # holds FIRMWARE_TOKEN; only the default branch can use it
     timeout-minutes: 240
     strategy:
       fail-fast: false

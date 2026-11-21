@@ -57,8 +57,8 @@ Setup, once:
 
 1. Create a fine-grained personal access token: resource owner your account, repository access *only* the firmware
    repository, permission *Contents: read-only*.
-2. In this repository: Settings > Secrets and variables > Actions > New repository secret `FIRMWARE_TOKEN`, with that token.
-   (Once this repository is public, move it to an environment `firmware` limited to the default branch; see the workflow.)
+2. In this repository: Settings > Environments > `firmware` (limited to the default branch) > Add secret `FIRMWARE_TOKEN`, with
+   that token.
 
 ## Adding a machine or a firmware
 
