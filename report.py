@@ -82,6 +82,7 @@ def scenarios_in_order(machines):
         import re
         names = re.findall(r"^@scenario\ndef (\w+)", open(os.path.join(HARNESS, "scenarios.py")).read(), re.M)
         names += re.findall(r"^@sample_scenario\ndef (\w+)", open(os.path.join(HARNESS, "sample_scenarios.py")).read(), re.M)
+        names += re.findall(r"^@route\ndef (\w+)", open(os.path.join(HARNESS, "routes.py")).read(), re.M)
     except OSError: pass
     for m in machines:
         for n, r in m["results"].items():

@@ -61,6 +61,9 @@ jobs:
           # an MPC Sample (kind "sample") has scenarios of its own: it has no plugin browser, so none of the Manager's apply
           names = {"manager": re.findall(r"^@scenario\ndef (\w+)", open("pm/tests/emu/scenarios.py").read(), re.M),
                    "sample": re.findall(r"^@sample_scenario\ndef (\w+)", open("pm/tests/emu/sample_scenarios.py").read(), re.M)}
+          # the install routes outside the Manager (zip, mpc-store.sh, desktop app) run on every kind of machine
+          routes = re.findall(r"^@route\ndef (\w+)", open("pm/tests/emu/routes.py").read(), re.M)
+          for own in names.values(): own += routes
           pick, ks = os.environ["PICK"].split(), os.environ["KS"].split()
           for what, got, known in (("machines.json", pick, {m["instance"] for m in ms}), ("the harness's scenarios", ks, set(sum(names.values(), [])))):
               if set(got) - known: raise SystemExit("not in %s: %s" % (what, " ".join(sorted(set(got) - known))))
