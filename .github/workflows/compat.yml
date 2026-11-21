@@ -5,7 +5,8 @@
 # A job starts from the machine's prebuilt image (images.yml; a private package) when one matches, otherwise it builds the instance
 # and the machine snapshot itself (about 15 minutes more) and says so in the run's summary. The firmware is fetched only for that,
 # from the private release in machines.json's firmware_repo with FIRMWARE_TOKEN, and checked against machines.json. Nothing built
-# from it is cached or uploaded as an artifact: the artifacts hold summaries, screen captures and the Manager's own logs only.
+# from it is cached or uploaded as an artifact: the artifacts hold summaries, screen captures, the Manager's own logs and, for a check
+# that failed, the guest's log of MPC and the apply (journal-no-launch.txt, journal-end.txt).
 name: compat
 
 on:
@@ -226,6 +227,8 @@ jobs:
             plugin-manager/tests/emu/results/${{ matrix.instance }}/**/*.log
             plugin-manager/tests/emu/results/${{ matrix.instance }}/**/*-result
             plugin-manager/tests/emu/results/${{ matrix.instance }}/**/*-device.txt
+            plugin-manager/tests/emu/results/${{ matrix.instance }}/**/journal-no-launch.txt
+            plugin-manager/tests/emu/results/${{ matrix.instance }}/**/journal-end.txt
             plugin-manager/tests/emu/results/${{ matrix.instance }}-*.log
             sources.txt
           retention-days: 30
