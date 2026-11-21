@@ -14,7 +14,19 @@
    "readonly_addins": 43,
    "power_cut_mid_apply": 343,
    "catalog_retry": 32,
-   "vst2_plugin_json": 43
+   "vst2_plugin_json": 43,
+   "zip_install_by_hand": 344,
+   "zip_install_by_hand_t": 277,
+   "zip_addin_by_hand": 158,
+   "store_install_update_remove": 618,
+   "store_install_update_remove_t": 274,
+   "store_list": 25,
+   "store_dependency": 61,
+   "store_addin_install_remove": 87,
+   "store_sync_prune": 105,
+   "store_device_limited": 38,
+   "desktop_install_update_remove": 249,
+   "desktop_addin_install_remove": 75
   },
   "mpc-g1-391": {
    "fresh_install": 15,
@@ -29,7 +41,19 @@
    "readonly_addins": 44,
    "power_cut_mid_apply": 315,
    "catalog_retry": 32,
-   "vst2_plugin_json": 125
+   "vst2_plugin_json": 125,
+   "zip_install_by_hand": 421,
+   "zip_install_by_hand_t": 264,
+   "zip_addin_by_hand": 149,
+   "store_install_update_remove": 311,
+   "store_install_update_remove_t": 265,
+   "store_list": 26,
+   "store_dependency": 61,
+   "store_addin_install_remove": 91,
+   "store_sync_prune": 65,
+   "store_device_limited": 38,
+   "desktop_install_update_remove": 283,
+   "desktop_addin_install_remove": 77
   },
   "mpc-g2-3100": {
    "fresh_install": 5,
@@ -44,7 +68,19 @@
    "readonly_addins": 16,
    "power_cut_mid_apply": 213,
    "catalog_retry": 25,
-   "vst2_plugin_json": 86
+   "vst2_plugin_json": 86,
+   "zip_install_by_hand": 328,
+   "zip_install_by_hand_t": 141,
+   "zip_addin_by_hand": 40,
+   "store_install_update_remove": 152,
+   "store_install_update_remove_t": 143,
+   "store_list": 6,
+   "store_dependency": 17,
+   "store_addin_install_remove": 24,
+   "store_sync_prune": 16,
+   "store_device_limited": 11,
+   "desktop_install_update_remove": 144,
+   "desktop_addin_install_remove": 27
   },
   "mpc-g2-3101": {
    "fresh_install": 5,
@@ -59,18 +95,54 @@
    "readonly_addins": 15,
    "power_cut_mid_apply": 213,
    "catalog_retry": 25,
-   "vst2_plugin_json": 14
+   "vst2_plugin_json": 14,
+   "zip_install_by_hand": 239,
+   "zip_install_by_hand_t": 125,
+   "zip_addin_by_hand": 34,
+   "store_install_update_remove": 515,
+   "store_install_update_remove_t": 133,
+   "store_list": 6,
+   "store_dependency": 16,
+   "store_addin_install_remove": 23,
+   "store_sync_prune": 100,
+   "store_device_limited": 9,
+   "desktop_install_update_remove": 134,
+   "desktop_addin_install_remove": 27
   },
   "mpc-x-391": {
    "fresh_install": 18,
    "plugin_install_update_remove": 273,
-   "long_press": 28
+   "long_press": 28,
+   "zip_install_by_hand": 428,
+   "zip_install_by_hand_t": 270,
+   "zip_addin_by_hand": 149,
+   "store_install_update_remove": 314,
+   "store_install_update_remove_t": 266,
+   "store_list": 26,
+   "store_dependency": 59,
+   "store_addin_install_remove": 81,
+   "store_sync_prune": 66,
+   "store_device_limited": 39,
+   "desktop_install_update_remove": 279,
+   "desktop_addin_install_remove": 67
   },
   "mpc-sample-130": {
    "sample_install": 24,
    "sample_plugin_loads": 62,
    "sample_reboot": 92,
-   "sample_uninstall": 63
+   "sample_uninstall": 63,
+   "zip_install_by_hand": 70,
+   "zip_install_by_hand_t": 58,
+   "zip_addin_by_hand": 34,
+   "store_install_update_remove": 73,
+   "store_install_update_remove_t": 58,
+   "store_list": 4,
+   "store_dependency": 17,
+   "store_addin_install_remove": 21,
+   "store_sync_prune": 13,
+   "store_device_limited": 9,
+   "desktop_install_update_remove": 83,
+   "desktop_addin_install_remove": 26
   }
  }
 }
