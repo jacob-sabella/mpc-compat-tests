@@ -15,7 +15,13 @@ MPC_VST = os.environ.get("MPC_VST") or os.path.join(os.path.dirname(os.path.dirn
 
 DEVICES = {"ACVA": "MPC One", "ACVA2": "MPC One+", "ACVA3": "MPC One (Gen 2)", "ACV5": "MPC X", "ACV5S": "MPC X SE", "ACV8": "MPC Live",
            "ACVB": "MPC Live II", "ACVG": "MPC Live III", "ACVC": "MPC XL", "ACVM": "MPC Key 61", "ACVM2": "MPC Key 61 (Gen 2)",
-           "ACVR": "MPC Key 37", "ACVR2": "MPC Key 37 (Gen 2)", "ADA2": "Force", "ADA2S": "Force (Gen 2)"}
+           "ACVR": "MPC Key 37", "ACVR2": "MPC Key 37 (Gen 2)", "ADA2": "Force", "ADA2S": "Force (Gen 2)",
+           "AC50": "MPC Sample"}
+
+
+def os_name(m):
+    """The firmware's own name: the MPC Sample runs MPC Sample 1.x, not MPC OS."""
+    return ("MPC Sample %s" if m.get("code") == "AC50" else "MPC OS %s") % m["firmware"]
 
 # What a pass does not mean. (scenario, test on the machine's facts) -> the note shown in the cell.
 PARTIAL = [
@@ -75,6 +81,7 @@ def scenarios_in_order(machines):
     try:                                    # the order they are written in, when the harness is importable
         import re
         names = re.findall(r"^@scenario\ndef (\w+)", open(os.path.join(HARNESS, "scenarios.py")).read(), re.M)
+        names += re.findall(r"^@sample_scenario\ndef (\w+)", open(os.path.join(HARNESS, "sample_scenarios.py")).read(), re.M)
     except OSError: pass
     for m in machines:
         for n, r in m["results"].items():
@@ -116,7 +123,7 @@ def build(label, out, results):
     names, docs = scenarios_in_order(machines)
     shutil.rmtree(out, ignore_errors=True); os.makedirs(out)
     notes = lambda n, m: [t for s, test, t in PARTIAL if s == n and test(m)]
-    cols = "".join("<th>%s<small>MPC OS %s · %s</small></th>" % (e(m["device"]), e(m["firmware"]), e(m["arch"])) for m in machines)
+    cols = "".join("<th>%s<small>%s · %s</small></th>" % (e(m["device"]), e(os_name(m)), e(m["arch"])) for m in machines)
     rows, details = [], []
     for n in names:
         cells = []
@@ -134,15 +141,16 @@ def build(label, out, results):
             body = ""
             if r["problems"]: body += "<ul>%s</ul>" % "".join("<li>%s</li>" % e(p) for p in r["problems"])
             for t in notes(n, m): body += "<p>* %s</p>" % e(t)
+            if r.get("findings"): body += "<p>Found (not failed):</p><ul>%s</ul>" % "".join("<li>%s</li>" % e(f) for f in r["findings"])
             if shots: body += '<div class="shots">%s</div>' % "".join(shots)
-            details.append((not r["ok"], '<details id="%s"%s><summary><span class="pill %s">%s</span> %s · %s, MPC OS %s</summary>%s</details>' %
-                            (aid, "" if r["ok"] else " open", kind, word, e(n), e(m["device"]), e(m["firmware"]), body or "<p>No captures.</p>")))
+            details.append((not r["ok"], '<details id="%s"%s><summary><span class="pill %s">%s</span> %s · %s, %s</summary>%s</details>' %
+                            (aid, "" if r["ok"] else " open", kind, word, e(n), e(m["device"]), e(os_name(m)), body or "<p>No captures.</p>")))
         rows.append('<tr><td class="s"><b>%s</b><span>%s</span></td>%s</tr>' % (e(n.replace("_", " ")), e(docs.get(n, "").rstrip(":").split(". ")[0].rstrip(".") + "."), "".join(cells)))
     total = sum(len(m["results"]) for m in machines); failed = sum(1 for m in machines for r in m["results"].values() if not r["ok"])
     cards = "".join(
-        '<div class="card"><h3>%s · MPC OS %s</h3><dl><dt>CPU</dt><dd>%s</dd><dt>Scenarios</dt><dd>%d run, %d failed</dd><dt>Run</dt><dd>%s UTC</dd>'
+        '<div class="card"><h3>%s · %s</h3><dl><dt>CPU</dt><dd>%s</dd><dt>Scenarios</dt><dd>%d run, %d failed</dd><dt>Run</dt><dd>%s UTC</dd>'
         '<dt>Image</dt><dd>%s</dd><dt>sha256</dt><dd><code>%s</code></dd></dl></div>' %
-        (e(m["device"]), e(m["firmware"]), e(m["arch"]), len(m["results"]), sum(1 for r in m["results"].values() if not r["ok"]),
+        (e(m["device"]), e(os_name(m)), e(m["arch"]), len(m["results"]), sum(1 for r in m["results"].values() if not r["ok"]),
          m["when"].strftime("%Y-%m-%d %H:%M"), e(m["image"] or "?"), e(m["sha256"] or "?")) for m in machines)
     src = [("Plugin Manager", PM), ("mpc-vst-plugins (installers, wrapper)", MPC_VST), ("QEngine", QENGINE)]
     tested = "".join("<li>%s: <code>%s</code>%s</li>" % (e(name), e(git(p, "rev-parse", "--short", "HEAD") or "?"),

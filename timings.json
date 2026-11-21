@@ -65,6 +65,12 @@
    "fresh_install": 18,
    "plugin_install_update_remove": 273,
    "long_press": 28
+  },
+  "mpc-sample-130": {
+   "sample_install": 24,
+   "sample_plugin_loads": 62,
+   "sample_reboot": 92,
+   "sample_uninstall": 63
   }
  }
 }

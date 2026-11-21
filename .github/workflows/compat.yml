@@ -58,14 +58,18 @@ jobs:
           import json, os, re
           ms = json.load(open("machines.json"))["machines"]
           times = json.load(open("timings.json"))["instances"]
-          names = re.findall(r"^@scenario\ndef (\w+)", open("pm/tests/emu/scenarios.py").read(), re.M)
+          # an MPC Sample (kind "sample") has scenarios of its own: it has no plugin browser, so none of the Manager's apply
+          names = {"manager": re.findall(r"^@scenario\ndef (\w+)", open("pm/tests/emu/scenarios.py").read(), re.M),
+                   "sample": re.findall(r"^@sample_scenario\ndef (\w+)", open("pm/tests/emu/sample_scenarios.py").read(), re.M)}
           pick, ks = os.environ["PICK"].split(), os.environ["KS"].split()
-          for what, got, known in (("machines.json", pick, {m["instance"] for m in ms}), ("the harness's scenarios", ks, set(names))):
+          for what, got, known in (("machines.json", pick, {m["instance"] for m in ms}), ("the harness's scenarios", ks, set(sum(names.values(), [])))):
               if set(got) - known: raise SystemExit("not in %s: %s" % (what, " ".join(sorted(set(got) - known))))
-          todo = ks or names
           inc = []
           for m in ms:
               if pick and m["instance"] not in pick: continue
+              own = names[m.get("kind", "manager")]
+              todo = [s for s in ks if s in own] if ks else own
+              if not todo: continue
               t = times.get(m["instance"]) or {}
               avg = sum(t.values()) / len(t) if t else 200
               total = sum(t.get(s, avg) for s in todo)        # a shard costs its setup too: at least ~400 s of scenarios each
