@@ -46,10 +46,6 @@ jobs:
       matrix: ${{ steps.m.outputs.matrix }}
     steps:
       - uses: actions/checkout@v4
-      - name: Harness (the scenario list)
-        env:
-          PMS: ${{ inputs.plugin_manager }}
-        run: git clone -q --filter=blob:none "https://github.com/${PMS%@*}" pm && git -C pm checkout -q "${PMS#*@}"
       - id: m
         env:
           PICK: ${{ inputs.machines }}
@@ -60,10 +56,10 @@ jobs:
           ms = json.load(open("machines.json"))["machines"]
           times = json.load(open("timings.json"))["instances"]
           # an MPC Sample (kind "sample") has scenarios of its own: it has no plugin browser, so none of the Manager's apply
-          names = {"manager": re.findall(r"^@scenario\ndef (\w+)", open("pm/tests/emu/scenarios.py").read(), re.M),
-                   "sample": re.findall(r"^@sample_scenario\ndef (\w+)", open("pm/tests/emu/sample_scenarios.py").read(), re.M)}
+          names = {"manager": re.findall(r"^@scenario\ndef (\w+)", open("emu/scenarios.py").read(), re.M),
+                   "sample": re.findall(r"^@sample_scenario\ndef (\w+)", open("emu/sample_scenarios.py").read(), re.M)}
           # the install routes outside the Manager (zip, mpc-store.sh, desktop app) run on every kind of machine
-          routes = re.findall(r"^@route\ndef (\w+)", open("pm/tests/emu/routes.py").read(), re.M)
+          routes = re.findall(r"^@route\ndef (\w+)", open("emu/routes.py").read(), re.M)
           for own in names.values(): own += routes
           pick, ks = os.environ["PICK"].split(), os.environ["KS"].split()
           for what, got, known in (("machines.json", pick, {m["instance"] for m in ms}), ("the harness's scenarios", ks, set(sum(names.values(), [])))):
@@ -90,6 +86,8 @@ jobs:
     # The Manager and the fixture (no firmware): built once, every shard downloads it.
     runs-on: ubuntu-24.04
     steps:
+      - uses: actions/checkout@v4
+        with: { path: compat }
       - name: Sources under test
         env:
           PMS: ${{ inputs.plugin_manager }}
@@ -102,7 +100,7 @@ jobs:
       - id: built
         uses: actions/cache@v4
         with:
-          path: plugin-manager/tests/emu/build/fx/work
+          path: compat/emu/build/fx/work
           key: ${{ env.BUILD_KEY }}
       - if: steps.built.outputs.cache-hit != 'true'
         uses: docker/setup-qemu-action@v3
@@ -129,12 +127,13 @@ jobs:
       - name: Build
         if: steps.built.outputs.cache-hit != 'true'
         env:
+          PM: ${{ github.workspace }}/plugin-manager
           MPC_VST: ${{ github.workspace }}/mpc-vst-plugins
-        run: plugin-manager/tests/emu/build.sh
+        run: compat/emu/build.sh
       - uses: actions/upload-artifact@v4
         with:
           name: manager-build
-          path: plugin-manager/tests/emu/build/fx/work
+          path: compat/emu/build/fx/work
           retention-days: 3
 
   machine:
@@ -148,6 +147,8 @@ jobs:
       matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     env:
       PM: ${{ github.workspace }}/plugin-manager
+      EMU: ${{ github.workspace }}/compat/emu
+      PM_EMU_STATE: ${{ github.workspace }}/plugin-manager/tests/emu/state   # where the prebuilt images unpack
       MPC_VST: ${{ github.workspace }}/mpc-vst-plugins
       QENGINE: ${{ github.workspace }}/QEngine
       FIRMWARE_DIR: /tmp/pm-firmware        # (job env cannot use the runner context)
@@ -171,13 +172,13 @@ jobs:
       - name: Emulator host (prebuilt, else built here)
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
-          tag="host-$(sha256sum "$PM/tests/emu/Dockerfile" | cut -c1-12)"
-          if docker pull -q "$REGISTRY:$tag"; then docker tag "$REGISTRY:$tag" pm-emu-host; else docker build -q -t pm-emu-host "$PM/tests/emu"; fi
+          tag="host-$(sha256sum "$EMU/Dockerfile" | cut -c1-12)"
+          if docker pull -q "$REGISTRY:$tag"; then docker tag "$REGISTRY:$tag" pm-emu-host; else docker build -q -t pm-emu-host "$EMU"; fi
 
       - id: img
         name: Machine (prebuilt image)
         run: |
-          id=$("$PM/tests/emu/qe" python3 "$PM/tests/emu/machine.py" --id "${{ matrix.instance }}")
+          id=$("$EMU/qe" python3 "$EMU/machine.py" --id "${{ matrix.instance }}")
           ref="$REGISTRY:${{ matrix.instance }}-$id"
           if docker pull -q "$ref" 2>/dev/null; then
             c=$(docker create "$ref" x); docker cp "$c:/machine.tar.zst" - | tar -xOf - | zstd -dc | tar -C "$GITHUB_WORKSPACE" --sparse -xf -
@@ -202,18 +203,16 @@ jobs:
           echo "${{ matrix.sha256 }}  $FIRMWARE_DIR/${{ matrix.image }}" | sha256sum -c -
       - name: Instance (only without a prebuilt image; never cached)
         if: steps.img.outputs.have != '1'
-        working-directory: plugin-manager
-        run: tests/emu/qe scripts/build_scripts/new_instance.sh --name "${{ matrix.instance }}" --product-code "${{ matrix.code }}" --firmware "$FIRMWARE_DIR/${{ matrix.image }}"
+        run: $EMU/qe scripts/build_scripts/new_instance.sh --name "${{ matrix.instance }}" --product-code "${{ matrix.code }}" --firmware "$FIRMWARE_DIR/${{ matrix.image }}"
 
       - name: The Manager and the fixture (from the build job)
         uses: actions/download-artifact@v4
-        with: { name: manager-build, path: plugin-manager/tests/emu/build/fx/work }
+        with: { name: manager-build, path: compat/emu/build/fx/work }
 
       - name: Scenarios (${{ matrix.ks }})
-        working-directory: plugin-manager
         run: |
           args=(-i "${{ matrix.instance }}"); for k in ${{ matrix.ks }}; do args+=(-k "$k"); done
-          tests/emu/run.sh "${args[@]}"
+          "$EMU/run.sh" "${args[@]}"
 
       - name: Results (no firmware files)
         if: always()
@@ -221,14 +220,14 @@ jobs:
         with:
           name: results-${{ matrix.instance }}-${{ matrix.shard }}
           path: |
-            plugin-manager/tests/emu/results/${{ matrix.instance }}/**/summary.json
-            plugin-manager/tests/emu/results/${{ matrix.instance }}/**/*.png
-            plugin-manager/tests/emu/results/${{ matrix.instance }}/**/*.log
-            plugin-manager/tests/emu/results/${{ matrix.instance }}/**/*-result
-            plugin-manager/tests/emu/results/${{ matrix.instance }}/**/*-device.txt
-            plugin-manager/tests/emu/results/${{ matrix.instance }}/**/journal-no-launch.txt
-            plugin-manager/tests/emu/results/${{ matrix.instance }}/**/journal-end.txt
-            plugin-manager/tests/emu/results/${{ matrix.instance }}-*.log
+            compat/emu/results/${{ matrix.instance }}/**/summary.json
+            compat/emu/results/${{ matrix.instance }}/**/*.png
+            compat/emu/results/${{ matrix.instance }}/**/*.log
+            compat/emu/results/${{ matrix.instance }}/**/*-result
+            compat/emu/results/${{ matrix.instance }}/**/*-device.txt
+            compat/emu/results/${{ matrix.instance }}/**/journal-no-launch.txt
+            compat/emu/results/${{ matrix.instance }}/**/journal-end.txt
+            compat/emu/results/${{ matrix.instance }}-*.log
             sources.txt
           retention-days: 30
 
@@ -238,7 +237,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - name: Harness (for the scenario order and descriptions)
+      - name: The Manager's commit, for the page
         env:
           PMS: ${{ inputs.plugin_manager }}
         run: git clone -q --filter=blob:none "https://github.com/${PMS%@*}" pm && git -C pm checkout -q "${PMS#*@}"
@@ -248,7 +247,7 @@ jobs:
         run: |
           python3 merge.py art results
           if ls results/*/work/summary.json >/dev/null 2>&1; then
-            HARNESS=pm/tests/emu PM=pm python3 report.py --results results --machines machines.json --out site
+            HARNESS=emu PM=pm python3 report.py --results results --machines machines.json --out site
           else
             echo "::warning::No machine produced results; no page. See the machine jobs."; mkdir -p site
           fi

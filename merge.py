@@ -5,7 +5,7 @@ import glob, json, os, shutil, sys
 
 art, out = sys.argv[1], sys.argv[2]
 merged = {}
-for root in sorted(glob.glob(os.path.join(art, "results-*", "plugin-manager", "tests", "emu", "results"))):
+for root in sorted(glob.glob(os.path.join(art, "results-*", "compat", "emu", "results"))):
     for f in glob.glob(os.path.join(root, "*", "*", "summary.json")):
         inst, build = f.split(os.sep)[-3:-1]
         d = json.load(open(f))
