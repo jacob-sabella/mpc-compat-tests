@@ -65,12 +65,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: h
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
           tag="host-$(sha256sum emu/Dockerfile | cut -c1-12)"; echo "tag=$tag" >> "$GITHUB_OUTPUT"
-          if docker manifest inspect "$REGISTRY:$tag" >/dev/null 2>&1; then echo "host image $tag exists"; exit 0; fi
-          docker build -q -t "$REGISTRY:$tag" --label "org.opencontainers.image.source=https://github.com/${{ github.repository }}" emu
-          docker push -q "$REGISTRY:$tag"
+          if docker manifest inspect "$REGISTRY:$tag" >/dev/null 2>&1; then echo "host image $tag exists"
+          else
+            docker build -q -t "$REGISTRY:$tag" --label "org.opencontainers.image.source=https://github.com/${{ github.repository }}" emu
+            docker push -q "$REGISTRY:$tag"
+          fi
+          # The host image has no firmware, so it goes first: stop here unless the package is private.
+          vis=$(gh api "/orgs/${{ github.repository_owner }}/packages/container/mpc-compat-machine" -q .visibility)
+          if [ "$vis" != private ]; then echo "::error::mpc-compat-machine is '$vis', not private. No firmware image was pushed."; exit 1; fi
 
   machine:
     needs: [plan, host]
