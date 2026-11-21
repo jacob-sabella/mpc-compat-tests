@@ -147,3 +147,35 @@ jobs:
           docker push -q "$REGISTRY:$tag"
           echo "$i: pushed $REGISTRY:$tag, $(du -h img/machine.tar.zst | cut -f1) compressed" >> "$GITHUB_STEP_SUMMARY"
           rm -rf img "$FIRMWARE_DIR"
+      - name: Keep tag
+        run: mkdir -p keep && echo "${{ steps.id.outputs.tag }}" > "keep/${{ matrix.instance }}"
+      - uses: actions/upload-artifact@v4
+        with: { name: "keep-${{ matrix.instance }}", path: keep, retention-days: 1 }
+
+  # Old images: once every machine built (or was already there), delete the versions of the machines in this run whose tag is
+  # not the current one, the host images other than the current one, and untagged leftovers. Machines not in this run are left alone.
+  prune:
+    needs: [host, machine]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { pattern: "keep-*", path: keep, merge-multiple: true }
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HOST_TAG: ${{ needs.host.outputs.tag }}
+        run: |
+          python3 - <<'PY2'
+          import json, os, subprocess
+          keep = {open(os.path.join("keep", f)).read().strip(): f for f in os.listdir("keep")}
+          insts = set(keep.values()); keep = set(keep) | {os.environ["HOST_TAG"]}
+          api = "/users/${{ github.repository_owner }}/packages/container/mpc-compat-machine/versions"
+          vs = json.loads(subprocess.check_output(["gh", "api", "--paginate", "--slurp", api + "?per_page=100"]))
+          vs = [v for page in vs for v in page]
+          for v in vs:
+              tags = v["metadata"]["container"]["tags"]
+              if any(t in keep for t in tags): continue
+              old = not tags or any(t.startswith("host-") or t.rsplit("-", 1)[0] in insts for t in tags)
+              if not old: continue
+              print("delete", v["id"], ",".join(tags) or "(untagged)")
+              subprocess.run(["gh", "api", "-X", "DELETE", "%s/%d" % (api, v["id"])], check=False)
+          PY2
