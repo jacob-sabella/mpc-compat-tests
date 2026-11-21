@@ -14,10 +14,10 @@ on:
     inputs:
       plugin_manager:
         description: "Plugin Manager: owner/repo@ref"
-        default: "jacob-sabella/plugin-manager@reliability-qengine"
+        default: "jacob-sabella/plugin-manager@reliability-qengine-v2"
       mpc_vst:
         description: "mpc-vst-plugins (installers): owner/repo@ref"
-        default: "jacob-sabella/mpc-vst-plugins@fix/pm-reliability"
+        default: "jacob-sabella/mpc-vst-plugins@fix/pm-reliability-v2"
       qengine_ref:
         description: "QEngine commit (Peyton-C/QEngine)"
         default: "83a03e5"
