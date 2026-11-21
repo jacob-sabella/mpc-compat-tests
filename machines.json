@@ -1,5 +1,5 @@
 {
- "firmware_repo": "jacob-sabella/mpc-firmware",
+ "firmware_repo": "open-mpc/mpc-firmware",
  "machines": [
   {
    "instance": "mpc-g1-391",

@@ -166,7 +166,7 @@ jobs:
           import json, os, subprocess
           keep = {open(os.path.join("keep", f)).read().strip(): f for f in os.listdir("keep")}
           insts = set(keep.values()); keep = set(keep) | {os.environ["HOST_TAG"]}
-          api = "/users/${{ github.repository_owner }}/packages/container/mpc-compat-machine/versions"
+          api = "/orgs/${{ github.repository_owner }}/packages/container/mpc-compat-machine/versions"
           vs = json.loads(subprocess.check_output(["gh", "api", "--paginate", "--slurp", api + "?per_page=100"]))
           vs = [v for page in vs for v in page]
           for v in vs:

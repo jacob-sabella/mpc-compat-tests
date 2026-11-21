@@ -13,7 +13,7 @@ The emulation is [QEngine](https://github.com/Peyton-C/QEngine), by [Peyton Cash
 
 ## Latest results
 
-**[Open the full report](https://jacob-sabella.github.io/mpc-compat-tests/)**: 141 of 141 checks passed on 2026-11-21.
+**[Open the full report](https://open-mpc.github.io/mpc-compat-tests/)**: 141 of 141 checks passed on 2026-11-21.
 
 | Machine | Passed |
 |---|---|
