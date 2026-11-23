@@ -239,6 +239,7 @@ def sample_reboot(t):
     t.vm.start()
     pid = sample.wait_mpc(t.vm, 300)
     log("%s: rebooted, MPC Sample up after %ds" % (t.vm.instance, time.time() - t0))
+    sample.main_screen(t.vm, 180)           # MPC mounts the card and opens its project before it shows this
 
     card = card_line(t, sample.CARD)
     t.check(card and "noexec" in card[0], "MPC mounted the card again, noexec: %s" % card)

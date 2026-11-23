@@ -220,7 +220,37 @@ def route(f):
     return f
 
 
+STALL_MARKS = ("killing thread by force", "exception not rethrown")      # MPC's watchdog killing its audio thread, then the abort
+
+
+def audio_stall(out):
+    """The guest's journal in this scenario's results shows MPC killing its audio thread."""
+    for path in glob.glob(os.path.join(out, "journal-*.txt")):
+        txt = open(path, errors="replace").read()
+        if all(m in txt for m in STALL_MARKS): return True
+    return False
+
+
 def run_one(instance, label, sc, info, fx, snapshot="ready", tclass=T, logs=(PM + "/device.txt", PM + "/manager.log", PM + "/apply.log", PM + "/result")):
+    """One scenario. On Gen1, whose emulation can starve MPC's audio thread, a failure with that crash gets one more try on a fresh
+    guest. The first try's files are kept in first-attempt/, and a pass after a retry is reported as one."""
+    r = run_attempt(instance, label, sc, info, fx, snapshot, tclass, logs)
+    out = os.path.join(HERE, "results", instance, label, sc.__name__)
+    if r["ok"] or info["arch"] == "aarch64" or not audio_stall(out): return r
+    log("%s %s: MPC killed its audio thread, trying once more" % (instance, sc.__name__))
+    first = out + ".first-attempt"
+    shutil.rmtree(first, ignore_errors=True); os.rename(out, first)
+    second = run_attempt(instance, label, sc, info, fx, snapshot, tclass, logs)
+    os.rename(first, os.path.join(out, "first-attempt"))
+    second["retried"] = r["problems"]
+    if second["ok"]:
+        second.setdefault("findings", []).insert(0, "emulator audio stall on the first attempt (MPC killed its audio thread); passed on retry")
+    else:
+        second["problems"] = second["problems"] + ["failed on retry; the first attempt ended with MPC killing its audio thread"]
+    return second
+
+
+def run_attempt(instance, label, sc, info, fx, snapshot, tclass, logs):
     out = os.path.join(HERE, "results", instance, label, sc.__name__)
     shutil.rmtree(out, ignore_errors=True); os.makedirs(out)
     vm = emu.VM(instance, label)
