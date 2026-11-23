@@ -131,7 +131,7 @@ def build(label, out, results):
         for m in machines:
             r = m["results"].get(n); aid = "%s-%s" % (m["instance"], n)
             if r is None: cells.append('<td class="c"><span class="pill none">not run</span></td>'); continue
-            kind, word = ("fail", "failed") if not r["ok"] else ("part", "passed*") if notes(n, m) else ("pass", "passed")
+            kind, word = ("fail", "failed") if not r["ok"] else ("part", "passed*") if notes(n, m) or r.get("retried") else ("pass", "passed")
             cells.append('<td class="c"><a class="pill %s" href="#%s">%s</a><span class="t">%ds</span></td>' % (kind, aid, word, r["seconds"]))
             shots = []
             for png in sorted(glob.glob(os.path.join(m["dir"], n, "*.png"))):
