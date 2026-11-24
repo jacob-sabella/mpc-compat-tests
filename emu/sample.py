@@ -71,6 +71,36 @@ def restart_mpc(vm, settle=8):
     return p
 
 
+SWITCHES = ("Enhancements.Enabled", "Enhancements.VST2Support")
+
+
+def has_vst2_switch(vm):
+    """Does this MPC Sample have Preferences > Enhancements' VST2 switch (1.4 and later)? Asked of the binary, as machine.py does."""
+    return vm.out("grep -c -a 'Enhancements.VST2Support' '/usr/bin/%s' 2>/dev/null || true" % PROCESS).strip() not in ("", "0")
+
+
+def enable_vst2(vm, settings):
+    """Switch on Enable Enhancements and VST2 Support, as a user does by hand. MPC stopped first: it writes its settings when it exits."""
+    vm.sh("systemctl stop %s" % SERVICE, timeout=int(emu.slow(120)))
+    s = shlex_quote(settings)
+    for key in SWITCHES:
+        vm.sh("if grep -q 'name=\"%s\"' %s; then sed -i 's|\\(name=\"%s\" val=\"\\)[^\"]*|\\11|' %s; "
+              "else sed -i 's|</PROPERTIES>|  <VALUE name=\"%s\" val=\"1\"/>\\n</PROPERTIES>|' %s; fi" % (key, s, key, s, key, s))
+    got = vm.read(settings)
+    for key in SWITCHES:
+        if 'name="%s" val="1"' % key not in got: raise Fail("could not switch on %s in %s" % (key, settings))
+    vm.sh("systemctl start %s" % SERVICE, timeout=int(emu.slow(120)))
+    wait_mpc(vm)
+    time.sleep(emu.slow(8))
+    for key in SWITCHES:                            # MPC keeps them: not reset when it starts
+        if 'name="%s" val="1"' % key not in vm.read(settings): raise Fail("MPC Sample reset %s when it started" % key)
+
+
+def shlex_quote(s):
+    import shlex
+    return shlex.quote(s)
+
+
 def screen_text(img):
     """OCR of the 320x240 screen, enlarged (the Manager's OCR is tuned for 1280x800)."""
     import io, subprocess
@@ -127,9 +157,11 @@ def make(instance, machine_id):
         settings = found[0]
         if "<Location>%s</Location>" % SYNTHS not in vm.read(settings):
             raise Fail("MPC did not add %s to its settings: %r" % (SYNTHS, vm.read(settings)))
+        vst2 = has_vst2_switch(vm)
+        if vst2: enable_vst2(vm, settings)                # MPC Sample 1.4+: plugins load only with it on
         main_screen(vm, save=os.path.join(vm.dir, "machine.png"))
         vm.savevm("machine")
-        info = {"id": machine_id, "kind": "sample", "arch": "aarch64", "synths": SYNTHS, "settings": settings, "external_plugins": False,
+        info = {"id": machine_id, "kind": "sample", "arch": "aarch64", "synths": SYNTHS, "settings": settings, "vst2_switch": vst2, "external_plugins": False,
                 "boot_seconds": int(boot), "mpc_seconds": int(mpc_up), "screen_seconds": int(screen_up),
                 "machine_seconds": int(time.time() - t0), "firmware": firmware, "card": card[0]}
         json.dump(info, open(os.path.join(vm.dir, "machine.json"), "w"))
@@ -146,5 +178,6 @@ def prepare(instance, stage, minfo):
     machine.copy_to(instance, stage)
     info = {k: minfo[k] for k in ("kind", "arch", "synths", "external_plugins", "boot_seconds", "mpc_seconds", "screen_seconds", "firmware")}
     info["settings"] = minfo.get("settings", SETTINGS)
+    info["vst2_switch"] = bool(minfo.get("vst2_switch"))
     info.update(machine=minfo["id"], prepare_seconds=0)
     return info
