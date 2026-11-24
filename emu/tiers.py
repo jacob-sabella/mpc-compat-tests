@@ -6,9 +6,9 @@ import argparse, ast, os, re, subprocess, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 COMPAT = os.path.dirname(HERE)
 PM = os.environ.get("PM") or os.path.join(os.path.dirname(COMPAT), "plugin-manager")
-FULL = ["mpc-g2-3101", "mpc-g2-3100", "mpc-g1-3101", "mpc-x-391", "mpc-g1-391", "mpc-sample-130"]
+FULL = ["mpc-g2-3101", "mpc-g2-3100", "mpc-g1-3101", "mpc-x-391", "mpc-g1-391", "mpc-sample-130", "mpc-sample-140"]
 QUICK = ["mpc-g1-3101", "mpc-g2-3101"]            # one Gen1 and one Gen2, both on the firmware with the VST2 Plugins path
-SAMPLE = "mpc-sample-130"
+SAMPLES = ["mpc-sample-130", "mpc-sample-140"]
 NO_EMU = re.compile(r"(\.md$|^docs/|^LICENSE$|^NOTICE|^tested\.json$|^tests/(run\.sh|addins\.sh|drive\.c|fixture\.py|snapshot_catalog\.py|catalog-snapshot\.json|devices/))")
 MANAGER = re.compile(r"^(src/|vst/|daemon/)")
 
@@ -68,7 +68,7 @@ def main():
             print("%s: %s" % (f, " ".join(fns)), file=sys.stderr)
             scen.update(fns)
             if deco != "sample_scenario": inst.update(QUICK)
-            if deco != "scenario": inst.add(SAMPLE)
+            if deco != "scenario": inst.update(SAMPLES)
         else:
             return full("%s: not something this tier can place" % f)
     if not scen:

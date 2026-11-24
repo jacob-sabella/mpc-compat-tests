@@ -18,14 +18,16 @@ FOLDER = sample.SYNTHS + "/acme - VST - Emu FX"
 SO = FOLDER + "/emu_fx.so"
 FXLOG = "/tmp/emu-fx.log"                                 # the effect writes a line here when MPC loads it
 RACK_DIR = "/data/mpc-addins/sample-rack"
-LOGS = (FXLOG, sample.SETTINGS)
+def logs(info):
+    """The guest files kept after each scenario: the effect's log and this machine's settings file (its path differs by version)."""
+    return (FXLOG, info.get("settings", sample.SETTINGS))
 
 
 class ST(T):
     """T, for the MPC Sample: its settings file, its process and its service."""
     def __init__(self, vm, fx, info, out):
         super().__init__(vm, fx, info, out)
-        self.settings = sample.SETTINGS
+        self.settings = info.get("settings", sample.SETTINGS)
         self.njournal = 0
 
     def journal(self, pid):
@@ -178,7 +180,7 @@ def sample_install(t):
     t.eq(txt.count(SO), 1, "the effect is listed once")
     t.has(txt, "<Location>%s</Location>" % sample.SYNTHS, "the card's Synths is still a content location")
     t.settings_ok("MPC Sample.settings")
-    t.check(t.vm.out("ls '%s'.bak-emu_fx-* 2>/dev/null || true" % sample.SETTINGS).strip(), "a settings backup was kept")
+    t.check(t.vm.out("ls '%s'.bak-emu_fx-* 2>/dev/null || true" % t.settings).strip(), "a settings backup was kept")
     warn = [l for l in out.splitlines() if "noexec" in l]
     t.check(warn, "install.sh warns that the card is noexec")
     if warn and "/sdcard/Synths" in warn[0]:

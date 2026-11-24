@@ -328,7 +328,7 @@ def worker(instance, label, root, k, kind, name):
     sc = {s.__name__: s for s in SCENARIOS}[name]
     fx = emu.Fixture(label)
     try:
-        if kind == "sample": r = run_one(instance, label, sc, info, fx, "machine", sys.modules["sample_scenarios"].ST, sys.modules["sample_scenarios"].LOGS)
+        if kind == "sample": r = run_one(instance, label, sc, info, fx, "machine", sys.modules["sample_scenarios"].ST, sys.modules["sample_scenarios"].logs(info))
         else: r = run_one(instance, label, sc, info, fx)
         with open(os.path.join(root, "result-%s.jsonl" % k), "a") as f: f.write(json.dumps(r) + "\n")
         return 0 if r["ok"] else 1
@@ -404,7 +404,7 @@ def main():
                 save_ready(a.instance, a.label, bid)
         if a.ready: return 0
         if kind == "sample":
-            res = [run_one(a.instance, a.label, s, info, fx, "machine", sample_scenarios.ST, sample_scenarios.LOGS) for s in todo]
+            res = [run_one(a.instance, a.label, s, info, fx, "machine", sample_scenarios.ST, sample_scenarios.logs(info)) for s in todo]
         else:
             res = [run_one(a.instance, a.label, s, info, fx) for s in todo]
         rc = write_summary(a.instance, a.label, info, res)

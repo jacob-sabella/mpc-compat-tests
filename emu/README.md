@@ -13,7 +13,7 @@ Three tiers, from a quick look to everything:
 
     emu/run.sh --tier quick                  # four scenarios on one Gen1 and one Gen2
     emu/run.sh --tier changed [--since REF]  # what the files changed since REF (default origin/main) need
-    emu/run.sh --tier full                   # every scenario on all six machines
+    emu/run.sh --tier full                   # every scenario on all seven machines
 
 `changed` (`tiers.py`) skips docs and the offline tests, runs the Manager's scenarios for a change in `src/`, `vst/` or `daemon/`, and
 only the scenarios edited in a scenario file. Anything else, the harness included, means the full matrix. It does not see a change
@@ -85,8 +85,8 @@ environment, and what the screen shows.
 | `catalog_retry` | the catalog cannot be fetched at first; the Manager tries again on its own |
 | `vst2_plugin_json` | the MPC OS 3.10.1 install path: `VST2 Plugins` and a correct plugin.json (on older firmware the switch is written into MPC.settings) |
 
-The MPC Sample (`mpc-sample-130`, AC50, built with `--product-code AC50 --firmware $FIRMWARE_DIR/MPC_SAMPLE_1.3.0_UPDATE.exe`) has no plugin
-browser, so it runs its own scenarios instead (`sample_scenarios.py`, machine in `sample.py`): `sample_install`, `sample_plugin_loads`,
+The MPC Sample (`mpc-sample-130`, AC50, built with `--product-code AC50 --firmware $FIRMWARE_DIR/MPC_SAMPLE_1.3.0_UPDATE.exe`, and
+`mpc-sample-140` from `MPC_Sample_1.4.0_Updater.exe`) has no plugin browser, so it runs its own scenarios instead (`sample_scenarios.py`, machine in `sample.py`): `sample_install`, `sample_plugin_loads`,
 `sample_reboot` and `sample_uninstall`, with the install scripts, the RACK addin's apply helper and the card's exec bind mount. See
 FINDINGS.md. A scenario can record a finding (what the device does that a user should know of) without failing.
 

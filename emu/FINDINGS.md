@@ -150,3 +150,16 @@ Still open:
 * Whether an installed plugin makes sound: no scenario loads an installed plugin onto a track other than the Manager itself.
 * Wi-Fi, TLS and the CA bundle: the guest talks plain http to a fixture on the host.
 * Timing and performance. TCG is several times slower than the hardware.
+
+## MPC Sample 1.4 (added 2026-11-24)
+
+Instance `mpc-sample-140` (AC50, MPC Sample 1.4.0.8, from Akai's `MPC Sample 1.4.0 Updater.exe`, QEngine 83a03e5 unmodified): built and
+booted like 1.3.0 (ssh after 26 s, main screen after 36 s, machine snapshot in 69 s). The card is mounted the same way.
+
+* **The settings file moved** to `/data/Settings/MPC Sample/MPC Sample.settings` (1.3.0: `/data/Settings/Akai/MPC Sample/...`). The
+  harness records the path in the machine's info (`settings`). The installers' glob `/data/Settings/*/MPC?Sample/MPC?Sample.settings`
+  (`install.sh`, `uninstall.sh`, `sync.sh`, `mpc-store.sh`) and the desktop app do not find it: every route stops with "MPC.settings not
+  found", and `mpc-store.sh` does not take the device for a Sample. 14 of 16 Sample scenarios fail on 1.4 for this reason alone; on
+  1.3.0 all 16 pass. Not fixed here (mpc-vst-plugins).
+* **A VST2 switch.** The 1.4 binary has `AC5xDevEnhancements::OnVST2SupportChanged` and a VST plugins view, like MPC OS 3.10.1's
+  "VST2 Plugins" setting. Not yet looked at: whether plugins load on 1.4 only with it on, and from where.
