@@ -167,7 +167,7 @@ booted like 1.3.0 (ssh after 26 s, main screen after 36 s, machine snapshot in a
   noexec (the kernel logs nothing; `/proc/mounts` changes). The bind mount of 1.3 is not needed, and a plugin in the project still
   loads after a reboot. `sample_plugin_loads` and `sample_reboot` check that on a machine with the switch.
 * **The main thread is named `<MPCSample>`** (1.3: `MPC Sample`); the effect's own log line is matched by pid only.
-* **Open: where to install.** The desktop app sees `Enhancements.VST2Support` in the settings and installs to `<card>/VST2 Plugins`, as
-  on MPC OS 3.10.1; the shell installers keep the card's `Synths` (`desktop_install_update_remove` fails on that). A plugin copied into
-  `<card>/VST2 Plugins` was not scanned or loaded when MPC started; MPC loads whatever path the project names. Which folder is right for
-  a 1.4 Sample is not settled here.
+* **Where to install.** The desktop app read the Sample's VST2 Support as MPC OS 3.10.1's VST2 mode and installed to
+  `<card>/VST2 Plugins`, which MPC did not pick up when it started (it loads the path the project names). It now keeps a Sample on the
+  card's `Synths`, as the shell installers do (mpc-vst-plugins `fix/sample-14-settings`). All 16 Sample scenarios pass on 1.4.0.8
+  and on 1.3.0.12 with that branch.
