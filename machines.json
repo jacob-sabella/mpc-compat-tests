@@ -27,14 +27,24 @@
    "code": "ACVA",
    "image": "MPC-3.10.1-Gen1-update.img",
    "sha256": "1df320c8b4f8a5ce4f212a6b89d6009bed3e794278a0ecb0ed609a5f0bf55364",
-   "shards": 4
+   "shards": 4,
+   "smoke": [
+    "fresh_install"
+   ]
   },
   {
    "instance": "mpc-g2-3101",
    "code": "ACVG",
    "image": "MPC-3.10.1-Gen2-update.img",
    "sha256": "b24857470114d354e370ffaecfb44a83ed435bf7dff65d8b982ebc8cac475b0a",
-   "shards": 2
+   "shards": 2,
+   "smoke": [
+    "fresh_install",
+    "plugin_install_update_remove",
+    "self_update",
+    "catalog_retry",
+    "store_install_update_remove_t"
+   ]
   },
   {
    "instance": "mpc-sample-130",
@@ -45,5 +55,5 @@
    "shards": 1
   }
  ],
- "note": "shards: how many parallel jobs a full run of this machine is split into (timings.json balances them). Gen1 (32-bit) is the slow one. kind: \"sample\" for an MPC Sample, which runs the harness's Sample scenarios (tests/emu/sample_scenarios.py) instead of the Manager's."
+ "note": "shards: how many parallel jobs a full run of this machine is split into (timings.json balances them). Gen1 (32-bit) is the slow one. kind: \"sample\" for an MPC Sample, which runs the harness's Sample scenarios (tests/emu/sample_scenarios.py) instead of the Manager's. smoke: what the workflow's default suite runs on this machine (none: the machine is left out of it)."
 }
