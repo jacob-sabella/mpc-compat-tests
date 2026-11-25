@@ -231,6 +231,17 @@ def audio_stall(out):
     return False
 
 
+# Gen1: what MPC's realtime threads (its audio threads among them) are doing, twice a second, so that a run where MPC's audio watchdog
+# kills MPC shows where its audio thread was: running (state R, CPU time rising), waiting on a lock (S, futex_wait_queue) or on the
+# kernel (D). One awk per sample over /proc/<MPC>/task/*/stat; ends with the guest. Kept as end-pm-threads.log.
+THREADS = "/tmp/pm-threads.log"
+SAMPLER = ("setsid sh -c 'while :; do p=$(pidof MPC); [ -n \"$p\" ] && awk -v up=\"$(cut -d\" \" -f1 /proc/uptime)\" "
+           "\"{l=\\$0; c=l; sub(/^[0-9]+ [(]/,\\\"\\\",c); sub(/[)] .*/,\\\"\\\",c); sub(/.*[)] /,\\\"\\\",l); n=split(l,a,\\\" \\\"); "
+           "if (a[39]+0) {split(FILENAME,f,\\\"/\\\"); w=\\\"\\\"; getline w < (\\\"/proc/\\\" f[3] \\\"/task/\\\" f[5] \\\"/wchan\\\"); "
+           "print up, f[5], c, a[1], a[38], a[12]+a[13], w}}\" /proc/$p/task/*/stat 2>/dev/null; sleep 0.5; done' "
+           ">%s 2>&1 </dev/null &" % THREADS)
+
+
 def run_one(instance, label, sc, info, fx, snapshot="ready", tclass=T, logs=(PM + "/device.txt", PM + "/manager.log", PM + "/apply.log", PM + "/result", THREADS)):
     """One scenario. On Gen1, whose emulation can starve MPC's audio thread, a failure with that crash gets one more try on a fresh
     guest. The first try's files are kept in first-attempt/, and a pass after a retry is reported as one."""
@@ -248,17 +259,6 @@ def run_one(instance, label, sc, info, fx, snapshot="ready", tclass=T, logs=(PM 
     else:
         second["problems"] = second["problems"] + ["failed on retry; the first attempt ended with MPC killing its audio thread"]
     return second
-
-
-# Gen1: what MPC's realtime threads (its audio threads among them) are doing, twice a second, so that a run where MPC's audio watchdog
-# kills MPC shows where its audio thread was: running (state R, CPU time rising), waiting on a lock (S, futex_wait_queue) or on the
-# kernel (D). One awk per sample over /proc/<MPC>/task/*/stat; ends with the guest. Kept as end-pm-threads.log.
-THREADS = "/tmp/pm-threads.log"
-SAMPLER = ("setsid sh -c 'while :; do p=$(pidof MPC); [ -n \"$p\" ] && awk -v up=\"$(cut -d\" \" -f1 /proc/uptime)\" "
-           "\"{l=\\$0; c=l; sub(/^[0-9]+ [(]/,\\\"\\\",c); sub(/[)] .*/,\\\"\\\",c); sub(/.*[)] /,\\\"\\\",l); n=split(l,a,\\\" \\\"); "
-           "if (a[39]+0) {split(FILENAME,f,\\\"/\\\"); w=\\\"\\\"; getline w < (\\\"/proc/\\\" f[3] \\\"/task/\\\" f[5] \\\"/wchan\\\"); "
-           "print up, f[5], c, a[1], a[38], a[12]+a[13], w}}\" /proc/$p/task/*/stat 2>/dev/null; sleep 0.5; done' "
-           ">%s 2>&1 </dev/null &" % THREADS)
 
 
 def run_attempt(instance, label, sc, info, fx, snapshot, tclass, logs):
