@@ -259,7 +259,9 @@ def run_one(instance, label, sc, info, fx, snapshot="ready", tclass=T, logs=(PM 
 # samples start after the kill), each passing on a second restore. So a Gen1 guest is checked RESTORE_CHECK seconds after it
 # comes up, and restored again (up to RESTORES times) when MPC was killed; the scenario starts only on a guest where it was not.
 # Run 45674344451: 12 kills in about 33 restores, usually the first two restores of a job's snapshot, then fine.
-RESTORE_CHECK, RESTORES = 8, 5
+# Run 45695266729: 16 of 34; one scenario took all five restores. MPC is stopped in a Gen1 snapshot (prepare.py) and continued
+# SETTLE seconds after the restore.
+RESTORE_CHECK, RESTORES, SETTLE = 8, 8, 5
 
 
 def restored(instance, label, snapshot, info, keep=None):
@@ -270,6 +272,9 @@ def restored(instance, label, snapshot, info, keep=None):
         try:
             vm.start(snapshot)
             if info.get("arch") == "aarch64": return vm, n
+            if info.get("mpc_stopped"):
+                time.sleep(SETTLE)
+                vm.sh("kill -CONT $(pidof MPC)", check=False)
             time.sleep(RESTORE_CHECK)
             kills = int(vm.out("journalctl -b --no-pager | grep -c 'killing thread by force' || true").strip() or 0)
         except BaseException:

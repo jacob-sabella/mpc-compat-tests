@@ -196,10 +196,17 @@ def prepare(instance, stage="work", fx=None, minfo=None):
         if st["version"] != VERSION_A: raise Fail("the running Manager says version %s" % st["version"])
         vm.shot(os.path.join(vm.dir, "ready.png"))
         kills = int(vm.out("journalctl -b --no-pager | grep -c 'killing thread by force' || true").strip() or 0)
-        if minfo["arch"] != "aarch64": start_sampler(vm); time.sleep(2)
+        stopped = minfo["arch"] != "aarch64"
+        if stopped:
+            start_sampler(vm); time.sleep(2)
+            # Gen1: the guest's kernel is busy for several seconds after each restore (run 45695266729: 97% of its CPU, nearly all
+            # kernel time, over the 8 s after the resume) and MPC's audio thread, waiting on the sound device (wait_for_avail),
+            # misses its deadline; MPC's watchdog then kills MPC. MPC is stopped (SIGSTOP) in the snapshot and continued once the
+            # guest has settled (run.py restored()).
+            vm.sh("kill -STOP $(pidof MPC)", check=False)
         vm.savevm("ready")
         info = {k: minfo[k] for k in ("arch", "synths", "external_plugins", "boot_seconds", "mpc_seconds", "firmware")}
-        info.update(machine=minfo["id"], prepare_seconds=int(time.time() - t0), kills=kills)   # run.py restored(): kills in the snapshot's journal
+        info.update(machine=minfo["id"], prepare_seconds=int(time.time() - t0), kills=kills, mpc_stopped=stopped)   # run.py restored(): kills in the snapshot's journal
         log("%s: ready in %ds from the machine snapshot" % (instance, time.time() - t0))
         return info
     finally:
