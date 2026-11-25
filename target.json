@@ -1,6 +1,6 @@
 {
  "note": "What the compat workflow tests unless a run says otherwise: the scheduled runs, and the page's 'code under test'. owner/repo@ref; qengine is a commit of Peyton-C/QEngine.",
- "plugin_manager": "jacob-sabella/plugin-manager@reliability-qengine-v2",
- "mpc_vst": "jacob-sabella/mpc-vst-plugins@fix/pm-reliability-v2",
+ "plugin_manager": "open-mpc/plugin-manager@main",
+ "mpc_vst": "open-mpc/mpc-vst-plugins@main",
  "qengine": "83a03e5"
 }
