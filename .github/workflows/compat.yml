@@ -2,7 +2,7 @@
 # into shards (parallel jobs, balanced by timings.json); one page is made from all of them. Started by hand (Actions > compat > Run
 # workflow) when the Manager or the installers change, or when new firmware comes out.
 #
-# suite "smoke" (the default) runs only each machine's "smoke" list in machines.json, a few minutes on two machines. "full" runs
+# suite "smoke" (the default) runs only each machine's "smoke" list in machines.json ("all": every scenario it has). "full" runs
 # every scenario on every machine; run it rarely, or locally with emu/run.sh --tier full. Naming machines or scenarios overrides both.
 #
 # A job starts from the machine's prebuilt image (images.yml; a private package) when one matches, otherwise it builds the instance
@@ -75,13 +75,13 @@ jobs:
               if set(got) - known: raise SystemExit("not in %s: %s" % (what, " ".join(sorted(set(got) - known))))
           smoke = os.environ["SUITE"] != "full" and not pick and not ks
           for m in ms:
-              if set(m.get("smoke", [])) - set(names[m.get("kind", "manager")]):
+              if m.get("smoke") != "all" and set(m.get("smoke", [])) - set(names[m.get("kind", "manager")]):
                   raise SystemExit("%s: smoke names a scenario it does not have" % m["instance"])
           inc = []
           for m in ms:
               if pick and m["instance"] not in pick: continue
               own = names[m.get("kind", "manager")]
-              todo = m.get("smoke", []) if smoke else [s for s in ks if s in own] if ks else own
+              todo = (own if m.get("smoke") == "all" else m.get("smoke", [])) if smoke else [s for s in ks if s in own] if ks else own
               if not todo: continue
               t = times.get(m["instance"]) or {}
               avg = sum(t.values()) / len(t) if t else 200

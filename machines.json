@@ -63,5 +63,5 @@
    "shards": 1
   }
  ],
- "note": "shards: how many parallel jobs a full run of this machine is split into (timings.json balances them). Gen1 (32-bit) is the slow one. kind: \"sample\" for an MPC Sample, which runs the harness's Sample scenarios (tests/emu/sample_scenarios.py) instead of the Manager's. smoke: what the workflow's default suite runs on this machine (none: the machine is left out of it)."
+ "note": "shards: how many parallel jobs a full run of this machine is split into (timings.json balances them). Gen1 (32-bit) is the slow one. kind: \"sample\" for an MPC Sample, which runs the harness's Sample scenarios (tests/emu/sample_scenarios.py) instead of the Manager's. smoke: what the workflow's default suite runs on this machine (\"all\": every scenario it has; none: the machine is left out of it)."
 }
