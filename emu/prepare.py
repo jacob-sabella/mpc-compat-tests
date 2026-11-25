@@ -140,32 +140,28 @@ def open_plugin(vm, plugin="Plugin Manager", vendor="OpenMPC", done=None, secs=4
         raise
 
 
-# Under emulation a Gen1 MPC sometimes comes back from the ready snapshot with an audio thread that stalls: 15 to 20 s after the
-# restore MPC's audio watchdog kills it ("!! killing thread by force !!", "FATAL: exception not rethrown") and MPC exits (191).
-# It is the snapshot, not the time since the Manager loaded: saved right after the catalog loaded, the kill came about 35 s after
-# "Initialising VST" (runs 45105440605, 45635047085); saved 90 s later, it came about 150 s after (run 45647884787), in every
-# scenario started from that snapshot, retries included. So a new ready snapshot is restored once and watched for CHECK seconds,
-# and made again from the machine snapshot when MPC is killed.
-CHECK = int(os.environ.get("PM_EMU_READY_CHECK", "60"))
-TRIES = 3
+# Under emulation a Gen1 MPC can stall its audio thread in the first minute after it loads the Manager: MPC's audio watchdog then
+# kills it ("!! killing thread by force !!", "FATAL: exception not rethrown") and MPC exits (191). Seen 34 to 70 s after
+# "Initialising VST" on hosted runners (compat runs 45105440605, 45635047085), so inside the ready snapshot when that was saved as
+# soon as the catalog loaded: every scenario started from it hit the same kill at the same guest time, and a retry from the same
+# snapshot hit it again. The snapshot is saved only after MPC has run SETTLE seconds with the Manager open, unkilled.
+SETTLE = int(os.environ.get("PM_EMU_SETTLE", "90"))
+SETTLE_TRIES = 3
 KILLED = "killing thread by force"
 
 
-def kills(vm):
-    return int(vm.out("journalctl -b --no-pager | grep -c '%s' || true" % KILLED).strip() or 0)
-
-
-def survives(vm, instance):
-    """Restore the ready snapshot and watch MPC for CHECK seconds: True when it is the same process and its watchdog did not fire."""
-    vm.start("ready")
-    try:
-        pid, before = vm.out("pidof MPC || true").strip(), kills(vm)
-        time.sleep(CHECK)
-        now, after = vm.out("pidof MPC || true").strip(), kills(vm)
-    finally:
-        vm.stop()
-    if pid and now == pid and after == before: return True
-    log("%s: MPC's audio watchdog killed MPC within %ds of restoring the ready snapshot (pid %s, now %s)" % (instance, CHECK, pid, now or "none"))
+def settled(vm, instance):
+    """MPC still the process that opened the Manager, SETTLE seconds on, and not killed by its watchdog. When it was, wait for
+    systemd to start it again (acvs.service, Restart=always) and return False: the caller opens the Manager again."""
+    pid = vm.out("pidof MPC || true").strip()
+    kills = int(vm.out("journalctl -b --no-pager | grep -c '%s' || true" % KILLED).strip() or 0)
+    time.sleep(SETTLE)
+    now = vm.out("pidof MPC || true").strip()
+    after = int(vm.out("journalctl -b --no-pager | grep -c '%s' || true" % KILLED).strip() or 0)
+    if now and now == pid and after == kills: return True
+    log("%s: MPC's audio watchdog killed MPC within %ds of the Manager opening (pid %s, now %s): opening it again" % (instance, SETTLE, pid, now or "none"))
+    until = time.time() + 120
+    while not vm.out("pidof MPC || true").strip() and time.time() < until: time.sleep(3)
     return False
 
 
@@ -174,26 +170,11 @@ def prepare(instance, stage="work", fx=None, minfo=None):
     a "ready" snapshot in that stage. Returns what a test needs to know about the machine."""
     own = fx is None
     if own: fx = emu.Fixture(stage)
-    try:
-        fx.catalog()
-        minfo = minfo or machine.ensure(instance)
-        t0 = time.time()
-        for attempt in range(1, TRIES + 1):
-            make_ready(instance, stage, fx, minfo)
-            if survives(emu.VM(instance, stage), instance): break
-            if attempt == TRIES: raise Fail("MPC's audio watchdog killed MPC after a restore of the ready snapshot, %d snapshots in a row" % attempt)
-        info = {k: minfo[k] for k in ("arch", "synths", "external_plugins", "boot_seconds", "mpc_seconds", "firmware")}
-        info.update(machine=minfo["id"], prepare_seconds=int(time.time() - t0), ready_attempts=attempt)
-        log("%s: ready in %ds from the machine snapshot%s" % (instance, time.time() - t0, " (snapshot %d)" % attempt if attempt > 1 else ""))
-        return info
-    finally:
-        if own: fx.stop()
-
-
-def make_ready(instance, stage, fx, minfo):
-    """One ready snapshot: from the machine snapshot, the Manager installed, open, its catalog loaded."""
+    fx.catalog()
+    minfo = minfo or machine.ensure(instance)
     machine.copy_to(instance, stage)
     vm = emu.VM(instance, stage)
+    t0 = time.time()
     try:
         vm.start(machine.SNAPSHOT)
         synths, ext = minfo["synths"], minfo["external_plugins"]
@@ -205,16 +186,24 @@ def make_ready(instance, stage, fx, minfo):
             install_manager(vm, synths)
             add_location(vm, synths)
         vm.sh("rm -rf /tmp/openmpc-pm; systemctl start acvs")
-        open_manager(vm)
-        try: st = vm.state(60, lambda s: s.get("loaded") == 1 and s.get("online") == 1, "catalog loaded")
-        except Fail:
-            log("manager.log:\n" + vm.read("/tmp/openmpc-pm/manager.log")[-3000:]); log("fixture requests:\n" + fx.requests()[-1500:])
-            raise
+        for attempt in range(1, SETTLE_TRIES + 1):
+            open_manager(vm)
+            try: st = vm.state(60, lambda s: s.get("loaded") == 1 and s.get("online") == 1, "catalog loaded")
+            except Fail:
+                log("manager.log:\n" + vm.read("/tmp/openmpc-pm/manager.log")[-3000:]); log("fixture requests:\n" + fx.requests()[-1500:])
+                raise
+            if settled(vm, instance): break
+            if attempt == SETTLE_TRIES: raise Fail("MPC's audio watchdog killed MPC after the Manager opened, %d times in a row" % attempt)
         if st["version"] != VERSION_A: raise Fail("the running Manager says version %s" % st["version"])
         vm.shot(os.path.join(vm.dir, "ready.png"))
         vm.savevm("ready")
+        info = {k: minfo[k] for k in ("arch", "synths", "external_plugins", "boot_seconds", "mpc_seconds", "firmware")}
+        info.update(machine=minfo["id"], prepare_seconds=int(time.time() - t0))
+        log("%s: ready in %ds from the machine snapshot" % (instance, time.time() - t0))
+        return info
     finally:
         vm.stop()
+        if own: fx.stop()
 
 
 if __name__ == "__main__":
