@@ -5,10 +5,12 @@
       Each machine's smoke list in machines.json ("all": every scenario it has; none: left out), or with --suite full every scenario of
       every machine; naming machines or scenarios overrides both. Each machine split into shards (machines.json's shards, balanced by
       timings.json).
-  plan.py rolling --pm SHA --mpc-vst SHA [--jobs N] [--budget SECONDS]
-      A few cells only: first those with no result on the code under test (never run, other code, commit unknown; the longest without
-      first), then those whose newest result failed or that are flaky (to confirm), then the oldest. Packed into at most N jobs, one
-      machine each (so a job pulls one prebuilt image), each about SECONDS of scenarios as timed on a desktop (timings.json).
+  plan.py rolling --pm SHA --mpc-vst SHA [--jobs N] [--budget SECONDS] [--again]
+      Only the cells with no result on the code under test (never run, other code, commit unknown; the longest without first). When
+      neither the Manager nor the installers changed since every cell ran, there is nothing to run: a quiet repository is a quiet
+      schedule. --again adds the cells whose newest result failed or that are flaky, then the oldest (a run by hand, to confirm).
+      Packed into at most N jobs, one machine each (so a job pulls one prebuilt image), each about SECONDS of scenarios as timed on a
+      desktop (timings.json).
 
 A job entry is the machine's line from machines.json plus shard, of, ks (its scenarios) and est (their desktop seconds)."""
 import argparse, json, os, re
@@ -54,7 +56,7 @@ def full(ms, names, times, pick, ks, suite="smoke"):
     return inc
 
 
-def rolling(ms, names, times, recs, target, jobs, budget):
+def rolling(ms, names, times, recs, target, jobs, budget, again=False):
     last, flaky = {}, set()
     for r in recs: last[(r["instance"], r["scenario"])] = r
     seen = {}
@@ -67,6 +69,7 @@ def rolling(ms, names, times, recs, target, jobs, budget):
             r = last.get((m["instance"], s)); c = (m["instance"], s)
             on_target = r is not None and all(r.get(k) == v for k, v in target.items())
             rank = 0 if not on_target else 1 if (not r["ok"] or c in flaky) else 2
+            if rank and not again: continue
             cells.append((rank, r["at"] if r else "", m["instance"], s))
     cells.sort()
     byname = {m["instance"]: m for m in ms}
@@ -100,6 +103,7 @@ if __name__ == "__main__":
     ap.add_argument("--budget", type=int, default=700, help="rolling: desktop seconds of scenarios per job (a hosted runner is ~4x slower)")
     ap.add_argument("--ledger", default=L.LEDGER)
     ap.add_argument("--explain", action="store_true", help="rolling: also print why, to stderr")
+    ap.add_argument("--again", action="store_true", help="rolling: also the failed, flaky and oldest cells when nothing is new")
     a = ap.parse_args()
     ms = json.load(open(os.path.join(HERE, "machines.json")))["machines"]
     times = json.load(open(os.path.join(HERE, "timings.json")))["instances"]
@@ -109,7 +113,7 @@ if __name__ == "__main__":
     else:
         pick = a.machines.split()
         inc, cells = rolling([m for m in ms if not pick or m["instance"] in pick], names, times, L.load(a.ledger),
-                             {"pm": a.pm, "mpc_vst": a.mpc_vst}, a.jobs, a.budget)
+                             {"pm": a.pm, "mpc_vst": a.mpc_vst}, a.jobs, a.budget, a.again)
         if a.explain:
             import sys
             why = ("no result on the code under test", "failed or flaky", "oldest")

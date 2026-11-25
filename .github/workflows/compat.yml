@@ -1,7 +1,7 @@
 # The compatibility matrix: the Plugin Manager run inside Akai's MPC firmware under QEngine. Each machine in machines.json is split
 # into shards (parallel jobs, balanced by timings.json); one page is made from all of them. Started by hand (Actions > compat > Run
-# workflow) for each machine's smoke list in machines.json (suite full: every scenario), or on the schedule for a few: the cells with no result on the code under test (target.json) first
-# (plan.py rolling). Every run adds its results to the ledger (ledger/, ledger.py) and remakes the page (docs/, report.py) from all of
+# workflow) for each machine's smoke list in machines.json (suite full: every scenario), or on the schedule for the cells with no result
+# on the code under test (target.json; plan.py rolling): none when the Manager and the installers have not changed. Every run adds its results to the ledger (ledger/, ledger.py) and remakes the page (docs/, report.py) from all of
 # them, committed to main.
 #
 # A job starts from the machine's prebuilt image (images.yml; a private package) when one matches, otherwise it builds the instance
@@ -13,7 +13,7 @@ name: compat
 
 on:
   schedule:
-    - cron: "23 */4 * * *"     # a few cells every four hours (plan.py rolling)
+    - cron: "23 */4 * * *"     # what changed since the last runs, if anything (plan.py rolling); nothing new, no jobs
   workflow_dispatch:
     inputs:
       suite:
@@ -37,7 +37,11 @@ on:
         description: "Scenario names, space separated (empty: all). Fewer scenarios than shards: fewer jobs"
         default: ""
       rolling:
-        description: "Only a few cells, the stalest first, as the schedule does (machines still narrows it)"
+        description: "Only the cells with no result on the code under test, as the schedule does (machines still narrows it)"
+        type: boolean
+        default: false
+      again:
+        description: "With rolling: also rerun failed, flaky and the oldest cells when nothing is new"
         type: boolean
         default: false
 
@@ -73,11 +77,12 @@ jobs:
           KS: ${{ inputs.scenarios }}
           SUITE: ${{ inputs.suite }}
           ROLLING: ${{ github.event_name == 'schedule' || inputs.rolling }}
+          AGAIN: ${{ inputs.again }}
         run: |
           t() { python3 -c "import json;print(json.load(open('target.json'))['$1'])"; }
           pin() { sha=$(git ls-remote "https://github.com/${1%@*}" "${1#*@}" | awk 'NR==1{print $1}'); echo "${1%@*}@${sha:-${1#*@}}"; }
           PMS=$(pin "${PMS:-$(t plugin_manager)}"); VSTS=$(pin "${VSTS:-$(t mpc_vst)}"); QREF=${QREF:-$(t qengine)}
-          if [ "$ROLLING" = true ]; then matrix=$(python3 plan.py rolling --pm "${PMS#*@}" --mpc-vst "${VSTS#*@}" --machines "$PICK" --explain)
+          if [ "$ROLLING" = true ]; then matrix=$(python3 plan.py rolling --pm "${PMS#*@}" --mpc-vst "${VSTS#*@}" --machines "$PICK" --explain $([ "$AGAIN" = true ] && echo --again))
           else matrix=$(python3 plan.py full --suite "${SUITE:-smoke}" --machines "$PICK" --scenarios "$KS"); fi
           { echo "plugin_manager=$PMS"; echo "mpc_vst=$VSTS"; echo "qengine_ref=$QREF"; echo "matrix=$matrix"
             echo "any=$(python3 -c 'import json,sys;print(str(bool(json.loads(sys.argv[1])["include"])).lower())' "$matrix")"; } >> "$GITHUB_OUTPUT"

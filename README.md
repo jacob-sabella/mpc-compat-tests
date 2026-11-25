@@ -29,10 +29,10 @@ rerun after an installer fix, and 18 install checks rerun on the final rebased c
 
 ## Running it
 
-Every four hours the **compat** workflow runs on its own, a few cells at a time (`plan.py rolling`): first the cells with no result
-on the code under test, then the ones whose newest result failed or that are flaky, then the oldest; at most six jobs, one machine
-each, about 45 to 60 minutes each on a hosted runner. The code under test is `target.json`: change it there when the Manager or
-installers branch under test changes, and the next runs go to the cells it makes stale.
+Every four hours the **compat** workflow checks the code under test (`target.json`: the Manager's and the installers' branches)
+and runs the cells with no result on its current commits (`plan.py rolling`), at most six jobs of 45 to 60 minutes, one machine
+each; the rest wait for the next run. When neither branch has moved since every cell ran, it runs nothing: quiet branches, quiet
+schedule. A new scenario in the harness, or a machine added to `machines.json`, is a cell with no result, so it runs too.
 
 Actions > **compat** > Run workflow runs every scenario instead (or the machines and scenarios named in the inputs; or, with
 *rolling*, what the schedule would). Empty refs mean `target.json`'s. A full run is for new firmware, or before a release.
