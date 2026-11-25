@@ -266,7 +266,8 @@ def run_one(instance, label, sc, info, fx, snapshot="ready", tclass=T, logs=(PM 
 # snapshot are fine. Seen in run 45667199378: four first attempts, each killed at the snapshot's own guest time (the thread
 # samples start after the kill), each passing on a second restore. So a Gen1 guest is checked RESTORE_CHECK seconds after it
 # comes up, and restored again (up to RESTORES times) when MPC was killed; the scenario starts only on a guest where it was not.
-RESTORE_CHECK, RESTORES = 8, 3
+# Run 45674344451: 12 kills in about 33 restores, usually the first two restores of a job's snapshot, then fine.
+RESTORE_CHECK, RESTORES = 8, 5
 
 
 def restored(instance, label, snapshot, info):
