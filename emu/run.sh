@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # The emulator tests, from one command: the Plugin Manager inside real MPC firmware (QEngine).
 #   emu/run.sh [--tier quick|changed|full] [--since REF] [--cap N] [--jobs N] [-i INSTANCE]... [--label BUILD] [-k NAME]... [--prepare] [--list] [--plan]
-# --tier quick    a few scenarios on one Gen1 and one Gen2       --tier full     every scenario on all six machines
+# --tier quick    a few scenarios on one Gen1 and one Gen2       --tier full     every scenario on all seven machines
 # --tier changed  what the files changed since --since (default origin/main) need; the full matrix when that cannot be told
 # No tier: every scenario on mpc-g1-391 and mpc-g2-3100. -i and -k override a tier's machines and scenarios.
 # --cap N: emulators at once across all machines (jobs.py; default from the cores and memory, about 10 on 32 cores; or PM_EMU_CAP).
@@ -9,7 +9,7 @@
 # See emu/README.md for the setup.
 set -uo pipefail
 here="$(cd "$(dirname "$0")" && pwd)"
-ALL=(mpc-g2-3101 mpc-g2-3100 mpc-g1-3101 mpc-x-391 mpc-g1-391 mpc-sample-130)
+ALL=(mpc-g2-3101 mpc-g2-3100 mpc-g1-3101 mpc-x-391 mpc-g1-391 mpc-sample-130 mpc-sample-140)
 QUICK=(fresh_install plugin_install_update_remove self_update catalog_retry)
 inst=(); rest=(); tier=; since=origin/main; jobs="${PM_EMU_JOBS:-}"; cap=; keys=0; dry=0; plan=0
 while [ $# -gt 0 ]; do case "$1" in

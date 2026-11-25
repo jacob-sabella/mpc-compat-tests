@@ -596,7 +596,7 @@ class Desktop:
             if r.get("state") != "running" or time.time() > end: break
             time.sleep(1)
         self.keep(path, r)
-        return r.get("state") == "done", r.get("result", ""), r.get("lines", [])
+        return r.get("state") == "done", r.get("result") or "", r.get("lines") or []     # a job that failed early has "lines": null
 
     def item(self, folder):
         """The /api/remove item for a folder the app lists on the device."""

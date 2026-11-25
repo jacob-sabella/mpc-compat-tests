@@ -143,6 +143,24 @@
    "store_device_limited": 9,
    "desktop_install_update_remove": 83,
    "desktop_addin_install_remove": 26
+  },
+  "mpc-sample-140": {
+   "sample_install": 24,
+   "sample_plugin_loads": 62,
+   "sample_reboot": 92,
+   "sample_uninstall": 63,
+   "zip_install_by_hand": 70,
+   "zip_install_by_hand_t": 58,
+   "zip_addin_by_hand": 34,
+   "store_install_update_remove": 73,
+   "store_install_update_remove_t": 58,
+   "store_list": 4,
+   "store_dependency": 17,
+   "store_addin_install_remove": 21,
+   "store_sync_prune": 13,
+   "store_device_limited": 9,
+   "desktop_install_update_remove": 83,
+   "desktop_addin_install_remove": 26
   }
  }
 }

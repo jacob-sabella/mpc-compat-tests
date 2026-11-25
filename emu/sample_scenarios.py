@@ -18,14 +18,17 @@ FOLDER = sample.SYNTHS + "/acme - VST - Emu FX"
 SO = FOLDER + "/emu_fx.so"
 FXLOG = "/tmp/emu-fx.log"                                 # the effect writes a line here when MPC loads it
 RACK_DIR = "/data/mpc-addins/sample-rack"
-LOGS = (FXLOG, sample.SETTINGS)
+def logs(info):
+    """The guest files kept after each scenario: the effect's log and this machine's settings file (its path differs by version)."""
+    return (FXLOG, info.get("settings", sample.SETTINGS))
 
 
 class ST(T):
     """T, for the MPC Sample: its settings file, its process and its service."""
     def __init__(self, vm, fx, info, out):
         super().__init__(vm, fx, info, out)
-        self.settings = sample.SETTINGS
+        self.settings = info.get("settings", sample.SETTINGS)
+        self.vst2_switch = bool(info.get("vst2_switch"))          # 1.4+: VST2 Support on, and MPC remounts the card exec itself
         self.njournal = 0
 
     def journal(self, pid):
@@ -119,7 +122,8 @@ def loads(t, pid):
     """Did MPC (pid) load the effect: its log, the effect's own line, the library mapped in MPC."""
     j = load_attempt(t, pid)
     mapped = SO in t.vm.out("cat /proc/%s/maps 2>/dev/null || true" % pid)
-    said = "main %s %s" % (sample.PROCESS, pid) in fxlog(t) or "main %s Main %s" % (sample.PROCESS, pid) in fxlog(t)
+    # "main <comm> <pid>": the comm is the main thread's name ("MPC Sample" on 1.3, "<MPCSample>" on 1.4), so only the pid counts
+    said = any(l.startswith("main ") and l.endswith(" %s" % pid) for l in fxlog(t).splitlines())
     return "Creating VST instance: emu_fx" in j, said, mapped
 
 
@@ -178,7 +182,7 @@ def sample_install(t):
     t.eq(txt.count(SO), 1, "the effect is listed once")
     t.has(txt, "<Location>%s</Location>" % sample.SYNTHS, "the card's Synths is still a content location")
     t.settings_ok("MPC Sample.settings")
-    t.check(t.vm.out("ls '%s'.bak-emu_fx-* 2>/dev/null || true" % sample.SETTINGS).strip(), "a settings backup was kept")
+    t.check(t.vm.out("ls '%s'.bak-emu_fx-* 2>/dev/null || true" % t.settings).strip(), "a settings backup was kept")
     warn = [l for l in out.splitlines() if "noexec" in l]
     t.check(warn, "install.sh warns that the card is noexec")
     if warn and "/sdcard/Synths" in warn[0]:
@@ -204,6 +208,16 @@ def sample_plugin_loads(t):
         t.has(env, lib, "MPC's LD_PRELOAD keeps what it had")
 
     pid = put_in_project(t)
+    if t.vst2_switch:                       # 1.4+, VST2 Support on: MPC remounts the card exec itself and loads it, no bind mount
+        t.eq(loads(t, pid), (True, True, True), "MPC loaded the effect from the noexec card (log, the effect's own line, mapped)")
+        t.check("noexec" not in card_line(t, sample.CARD)[0], "MPC remounted the card exec to load it: %s" % card_line(t, sample.CARD))
+        t.finding("with VST2 Support on, MPC Sample remounts the card without noexec when it loads a plugin from it: the bind mount "
+                  "is not needed")
+        t.eq(in_project(t), 1, "the project still names the effect once")
+        t.settings_ok("MPC Sample.settings")
+        t.keep_journal("loaded")
+        sample.main_screen(t.vm); t.shot("loaded")
+        return
     j = load_attempt(t, pid)
     t.has(j, "Attempting to load VST: %s" % SO, "MPC tries to load the effect from the project")
     t.hasnt(j, "Creating VST instance: emu_fx", "MPC's log, with the card noexec")
@@ -242,7 +256,8 @@ def sample_reboot(t):
     sample.main_screen(t.vm, 180)           # MPC mounts the card and opens its project before it shows this
 
     card = card_line(t, sample.CARD)
-    t.check(card and "noexec" in card[0], "MPC mounted the card again, noexec: %s" % card)
+    if not t.vst2_switch:                   # 1.4+ may already have remounted it exec to load the effect (below)
+        t.check(card and "noexec" in card[0], "MPC mounted the card again, noexec: %s" % card)
     t.check(t.vm.exists(SO), "the effect is still on the card")
     t.has(t.settings_text(), 'file="%s"' % SO, "MPC Sample.settings still lists the effect")
     t.eq(in_project(t), 1, "the project still names the effect")
@@ -252,6 +267,15 @@ def sample_reboot(t):
     rack = "mpc_sample_rack.so" in mpc_preload(t)
     created, said, mapped = loads(t, pid)
     t.eq((bool(bound), dropin, rack), (False, False, False), "after the reboot: the bind mount, the addin's drop-in, RACK preloaded")
+    if t.vst2_switch:                       # 1.4+, VST2 Support on: MPC remounts the card exec itself, so no bind mount is needed
+        t.eq((created, said, mapped), (True, True, True), "after the reboot MPC loads the effect from the project")
+        t.check("noexec" not in card_line(t, sample.CARD)[0], "MPC remounted the card exec to load it: %s" % card_line(t, sample.CARD))
+        t.finding("with VST2 Support on, a plugin in the project still loads after a reboot: MPC Sample remounts the card exec itself")
+        t.finding("after a reboot the addin installer's drop-in (in /run, as the root is read-only) is gone: MPC starts without the RACK "
+                  "addin until its install.sh is run again")
+        sample.main_screen(t.vm); t.shot("after-reboot")
+        t.keep_journal("reboot")
+        return
     t.eq((created, said, mapped), (False, False, False), "after the reboot MPC does not load the effect")
     t.finding("after a reboot the exec bind mount of %s is gone, so the plugin still in the project and in the settings is not loaded: "
               "MPC logs \"Attempting to load VST\" and nothing else, and nothing on the screen says so" % sample.SYNTHS)
