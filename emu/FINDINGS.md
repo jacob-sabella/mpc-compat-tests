@@ -150,3 +150,24 @@ Still open:
 * Whether an installed plugin makes sound: no scenario loads an installed plugin onto a track other than the Manager itself.
 * Wi-Fi, TLS and the CA bundle: the guest talks plain http to a fixture on the host.
 * Timing and performance. TCG is several times slower than the hardware.
+
+## MPC Sample 1.4 (added 2026-11-24)
+
+Instance `mpc-sample-140` (AC50, MPC Sample 1.4.0.8, from Akai's `MPC Sample 1.4.0 Updater.exe`, QEngine 83a03e5 unmodified): built and
+booted like 1.3.0 (ssh after 26 s, main screen after 36 s, machine snapshot in about 80 s). The card is mounted the same way, noexec.
+
+* **The settings file moved** to `/data/Settings/MPC Sample/MPC Sample.settings` (1.3.0: `/data/Settings/Akai/MPC Sample/...`). The
+  harness records the path in the machine's info (`settings`). The installers' glob (`install.sh`, `uninstall.sh`, `sync.sh`,
+  `mpc-store.sh`, the desktop app) did not find it: every route stopped with "MPC.settings not found" (14 of 16 scenarios). Fixed in
+  mpc-vst-plugins on `fix/sample-14-settings`.
+* **VST2 Support.** 1.4 has Preferences > Enhancements as MPC OS 3.10.1 has, with the same keys (`Enhancements.Enabled`,
+  `Enhancements.VST2Support`). With them off, MPC never tries to load a plugin in the project. The machine switches both on, as a user
+  does (`vst2_switch` in its info).
+* **MPC remounts the card exec.** With VST2 Support on, the first time MPC loads a plugin from the card it remounts the card without
+  noexec (the kernel logs nothing; `/proc/mounts` changes). The bind mount of 1.3 is not needed, and a plugin in the project still
+  loads after a reboot. `sample_plugin_loads` and `sample_reboot` check that on a machine with the switch.
+* **The main thread is named `<MPCSample>`** (1.3: `MPC Sample`); the effect's own log line is matched by pid only.
+* **Where to install.** The desktop app read the Sample's VST2 Support as MPC OS 3.10.1's VST2 mode and installed to
+  `<card>/VST2 Plugins`, which MPC did not pick up when it started (it loads the path the project names). It now keeps a Sample on the
+  card's `Synths`, as the shell installers do (mpc-vst-plugins `fix/sample-14-settings`). All 16 Sample scenarios pass on 1.4.0.8
+  and on 1.3.0.12 with that branch.
