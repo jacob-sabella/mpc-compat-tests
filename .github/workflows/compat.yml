@@ -1,9 +1,8 @@
 # The compatibility matrix: the Plugin Manager run inside Akai's MPC firmware under QEngine. Each machine in machines.json is split
 # into shards (parallel jobs, balanced by timings.json); one page is made from all of them. Started by hand (Actions > compat > Run
-# workflow) when the Manager or the installers change, or when new firmware comes out.
-#
-# suite "smoke" (the default) runs only each machine's "smoke" list in machines.json ("all": every scenario it has). "full" runs
-# every scenario on every machine; run it rarely, or locally with emu/run.sh --tier full. Naming machines or scenarios overrides both.
+# workflow) for each machine's smoke list in machines.json (suite full: every scenario), or on the schedule for a few: the cells with no result on the code under test (target.json) first
+# (plan.py rolling). Every run adds its results to the ledger (ledger/, ledger.py) and remakes the page (docs/, report.py) from all of
+# them, committed to main.
 #
 # A job starts from the machine's prebuilt image (images.yml; a private package) when one matches, otherwise it builds the instance
 # and the machine snapshot itself (about 15 minutes more) and says so in the run's summary. The firmware is fetched only for that,
@@ -13,6 +12,8 @@
 name: compat
 
 on:
+  schedule:
+    - cron: "23 */4 * * *"     # a few cells every four hours (plan.py rolling)
   workflow_dispatch:
     inputs:
       suite:
@@ -21,20 +22,24 @@ on:
         options: [smoke, full]
         default: smoke
       plugin_manager:
-        description: "Plugin Manager: owner/repo@ref"
-        default: "jacob-sabella/plugin-manager@reliability-qengine-v2"
+        description: "Plugin Manager: owner/repo@ref (empty: target.json)"
+        default: ""
       mpc_vst:
-        description: "mpc-vst-plugins (installers): owner/repo@ref"
-        default: "jacob-sabella/mpc-vst-plugins@fix/pm-reliability-v2"
+        description: "mpc-vst-plugins (installers): owner/repo@ref (empty: target.json)"
+        default: ""
       qengine_ref:
-        description: "QEngine commit (Peyton-C/QEngine)"
-        default: "83a03e5"
+        description: "QEngine commit (Peyton-C/QEngine; empty: target.json)"
+        default: ""
       machines:
         description: "Instances from machines.json, space separated (empty: all)"
         default: ""
       scenarios:
         description: "Scenario names, space separated (empty: all). Fewer scenarios than shards: fewer jobs"
         default: ""
+      rolling:
+        description: "Only a few cells, the stalest first, as the schedule does (machines still narrows it)"
+        type: boolean
+        default: false
 
 concurrency:
   group: compat
@@ -52,59 +57,45 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       matrix: ${{ steps.m.outputs.matrix }}
+      any: ${{ steps.m.outputs.any }}
+      plugin_manager: ${{ steps.m.outputs.plugin_manager }}
+      mpc_vst: ${{ steps.m.outputs.mpc_vst }}
+      qengine_ref: ${{ steps.m.outputs.qengine_ref }}
     steps:
       - uses: actions/checkout@v4
+      # The refs pinned to commits here, so every job of the run tests the same code even if a branch moves meanwhile.
       - id: m
         env:
+          PMS: ${{ inputs.plugin_manager }}
+          VSTS: ${{ inputs.mpc_vst }}
+          QREF: ${{ inputs.qengine_ref }}
           PICK: ${{ inputs.machines }}
           KS: ${{ inputs.scenarios }}
           SUITE: ${{ inputs.suite }}
+          ROLLING: ${{ github.event_name == 'schedule' || inputs.rolling }}
         run: |
-          python3 - <<'PY' >> "$GITHUB_OUTPUT"
-          import json, os, re
-          ms = json.load(open("machines.json"))["machines"]
-          times = json.load(open("timings.json"))["instances"]
-          # an MPC Sample (kind "sample") has scenarios of its own: it has no plugin browser, so none of the Manager's apply
-          names = {"manager": re.findall(r"^@scenario\ndef (\w+)", open("emu/scenarios.py").read(), re.M),
-                   "sample": re.findall(r"^@sample_scenario\ndef (\w+)", open("emu/sample_scenarios.py").read(), re.M)}
-          # the install routes outside the Manager (zip, mpc-store.sh, desktop app) run on every kind of machine
-          routes = re.findall(r"^@route\ndef (\w+)", open("emu/routes.py").read(), re.M)
-          for own in names.values(): own += routes
-          pick, ks = os.environ["PICK"].split(), os.environ["KS"].split()
-          for what, got, known in (("machines.json", pick, {m["instance"] for m in ms}), ("the harness's scenarios", ks, set(sum(names.values(), [])))):
-              if set(got) - known: raise SystemExit("not in %s: %s" % (what, " ".join(sorted(set(got) - known))))
-          smoke = os.environ["SUITE"] != "full" and not pick and not ks
-          for m in ms:
-              if m.get("smoke") != "all" and set(m.get("smoke", [])) - set(names[m.get("kind", "manager")]):
-                  raise SystemExit("%s: smoke names a scenario it does not have" % m["instance"])
-          inc = []
-          for m in ms:
-              if pick and m["instance"] not in pick: continue
-              own = names[m.get("kind", "manager")]
-              todo = (own if m.get("smoke") == "all" else m.get("smoke", [])) if smoke else [s for s in ks if s in own] if ks else own
-              if not todo: continue
-              t = times.get(m["instance"]) or {}
-              avg = sum(t.values()) / len(t) if t else 200
-              total = sum(t.get(s, avg) for s in todo)        # a shard costs its setup too: at least ~400 s of scenarios each
-              n = max(1, min(int(m.get("shards", 1)), len(todo), int(total // 400) or 1))
-              shards = [[] for _ in range(n)]; load = [0] * n
-              for s in sorted(todo, key=lambda s: -t.get(s, avg)):    # longest first, onto the least loaded shard
-                  k = load.index(min(load)); shards[k].append(s); load[k] += t.get(s, avg)
-              for k, sc in enumerate(shards):
-                  inc.append(dict(m, shard=k + 1, of=n, ks=" ".join(sorted(sc, key=todo.index)), est=int(load[k])))
-          print("matrix=" + json.dumps({"include": inc}))
-          PY
+          t() { python3 -c "import json;print(json.load(open('target.json'))['$1'])"; }
+          pin() { sha=$(git ls-remote "https://github.com/${1%@*}" "${1#*@}" | awk 'NR==1{print $1}'); echo "${1%@*}@${sha:-${1#*@}}"; }
+          PMS=$(pin "${PMS:-$(t plugin_manager)}"); VSTS=$(pin "${VSTS:-$(t mpc_vst)}"); QREF=${QREF:-$(t qengine)}
+          if [ "$ROLLING" = true ]; then matrix=$(python3 plan.py rolling --pm "${PMS#*@}" --mpc-vst "${VSTS#*@}" --machines "$PICK" --explain)
+          else matrix=$(python3 plan.py full --suite "${SUITE:-smoke}" --machines "$PICK" --scenarios "$KS"); fi
+          { echo "plugin_manager=$PMS"; echo "mpc_vst=$VSTS"; echo "qengine_ref=$QREF"; echo "matrix=$matrix"
+            echo "any=$(python3 -c 'import json,sys;print(str(bool(json.loads(sys.argv[1])["include"])).lower())' "$matrix")"; } >> "$GITHUB_OUTPUT"
+          { echo "### Plan"; echo; echo "Plugin Manager \`$PMS\`, installers \`$VSTS\`, QEngine \`$QREF\`"; echo
+            python3 -c 'import json,sys;[print("- %s %d/%d: %s (~%d s on a desktop)" % (j["instance"], j["shard"], j["of"], j["ks"], j["est"])) for j in json.loads(sys.argv[1])["include"]]' "$matrix"; } >> "$GITHUB_STEP_SUMMARY"
 
   build:
     # The Manager and the fixture (no firmware): built once, every shard downloads it.
+    needs: plan
+    if: needs.plan.outputs.any == 'true'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with: { path: compat }
       - name: Sources under test
         env:
-          PMS: ${{ inputs.plugin_manager }}
-          VSTS: ${{ inputs.mpc_vst }}
+          PMS: ${{ needs.plan.outputs.plugin_manager }}
+          VSTS: ${{ needs.plan.outputs.mpc_vst }}
         run: |
           clone() { git clone -q --filter=blob:none "https://github.com/${1%@*}" "$2" && git -C "$2" checkout -q "${1#*@}"; }
           clone "$PMS" plugin-manager; clone "$VSTS" mpc-vst-plugins
@@ -151,6 +142,7 @@ jobs:
 
   machine:
     needs: [plan, build]
+    if: needs.plan.outputs.any == 'true'
     name: ${{ matrix.instance }} ${{ matrix.shard }}/${{ matrix.of }}
     runs-on: ubuntu-24.04
     environment: firmware   # holds FIRMWARE_TOKEN; only the default branch can use it
@@ -172,9 +164,9 @@ jobs:
         with: { path: compat }
       - name: Sources under test
         env:
-          PMS: ${{ inputs.plugin_manager }}
-          VSTS: ${{ inputs.mpc_vst }}
-          QREF: ${{ inputs.qengine_ref }}
+          PMS: ${{ needs.plan.outputs.plugin_manager }}
+          VSTS: ${{ needs.plan.outputs.mpc_vst }}
+          QREF: ${{ needs.plan.outputs.qengine_ref }}
         run: |
           clone() { git clone -q --filter=blob:none "https://github.com/${1%@*}" "$2" && git -C "$2" checkout -q "${1#*@}"; }
           clone "$PMS" "$PM"; clone "$VSTS" "$MPC_VST"; clone "Peyton-C/QEngine@$QREF" "$QENGINE"
@@ -245,28 +237,45 @@ jobs:
           retention-days: 30
 
   report:
-    needs: machine
-    if: always()
+    # This run's results into the ledger, the page remade from the whole ledger, both committed to main (Pages serves docs/). The page's
+    # code under test is target.json's, whatever this run tested: a run of other code shows as other code on it.
+    needs: [plan, machine]
+    if: always() && needs.plan.outputs.any == 'true'
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
-      - name: The Manager's commit, for the page
-        env:
-          PMS: ${{ inputs.plugin_manager }}
-        run: git clone -q --filter=blob:none "https://github.com/${PMS%@*}" pm && git -C pm checkout -q "${PMS#*@}"
+        with: { ref: main }
       - uses: actions/download-artifact@v4
         with: { pattern: results-*, path: art }
-      - name: Page
+      - name: Ledger and page, onto main
+        env:
+          PMS: ${{ needs.plan.outputs.plugin_manager }}
+          VSTS: ${{ needs.plan.outputs.mpc_vst }}
+          URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          RUN: gh-${{ github.run_id }}-${{ github.run_attempt }}
+          EVENT: ${{ github.event_name }}
         run: |
-          python3 merge.py art results
-          if ls results/*/work/summary.json >/dev/null 2>&1; then
-            HARNESS=emu PM=pm python3 report.py --results results --machines machines.json --out site
-          else
-            echo "::warning::No machine produced results; no page. See the machine jobs."; mkdir -p site
-          fi
+          command -v convert >/dev/null || { sudo apt-get update -q && sudo apt-get install -y -q imagemagick; }    # shrinks the captures
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          t() { python3 -c "import json;print(json.load(open('target.json'))['$1'])"; }
+          # Someone may push to main meanwhile: start again from it (adding to the ledger is idempotent) until the push goes in.
+          for try in 1 2 3 4 5; do
+            git fetch -q origin main && git reset -q --hard origin/main
+            python3 ledger.py add-art art --run "$RUN" --runner hosted --url "$URL" --pm-repo "${PMS%@*}" --mpc-vst-repo "${VSTS%@*}"
+            python3 ledger.py prune-shots
+            python3 report.py --ledger ledger --out docs --pm "$(t plugin_manager)" --mpc-vst "$(t mpc_vst)"
+            git add -A ledger docs
+            git diff --cached --quiet && { echo "nothing new"; break; }
+            git commit -q -m "Results of $RUN ($EVENT)" && git push -q origin HEAD:main && break
+            sleep $((try * 10))
+          done
           { echo "### Compatibility"; echo; echo "Sources:"; cat art/*/sources.txt 2>/dev/null | sort -u | sed 's/^/- /'; } >> "$GITHUB_STEP_SUMMARY"
+          python3 -c 'import json;d=json.load(open("docs/results.json"));c=d["cells"]
+          print("Page: %d cells, %d failed, %d on the code under test" % (len(c), sum(x["ok"] is False for x in c), sum(x.get("current") is True for x in c)))' >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         with:
           name: compat-page
-          path: site
-          retention-days: 90
+          path: docs
+          retention-days: 30

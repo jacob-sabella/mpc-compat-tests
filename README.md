@@ -29,13 +29,35 @@ rerun after an installer fix, and 18 install checks rerun on the final rebased c
 
 ## Running it
 
-Actions > **compat** > Run workflow. The inputs say which Plugin Manager, installers (mpc-vst-plugins) and QEngine to test,
-as `owner/repo@ref`, and optionally which machines and scenarios. A run is meant for when the Manager or the installers
-change, or when new firmware comes out.
+Every four hours the **compat** workflow runs on its own, a few cells at a time (`plan.py rolling`): first the cells with no result
+on the code under test, then the ones whose newest result failed or that are flaky, then the oldest; at most six jobs, one machine
+each, about 45 to 60 minutes each on a hosted runner. The code under test is `target.json`: change it there when the Manager or
+installers branch under test changes, and the next runs go to the cells it makes stale.
 
-Each machine is split into shards, parallel jobs that each run part of its scenarios (`shards` in `machines.json`, balanced by the
-desktop timings in `timings.json`; a small run gets fewer). The report job merges them (`merge.py`) and makes the page, the
-`compat-page` artifact of the run; open `index.html`.
+Actions > **compat** > Run workflow runs every scenario instead (or the machines and scenarios named in the inputs; or, with
+*rolling*, what the schedule would). Empty refs mean `target.json`'s. A full run is for new firmware, or before a release.
+
+Either way, each machine's scenarios are split into jobs (`plan.py`, balanced by the desktop timings in `timings.json`), and the
+report job adds their results to the ledger (`ledger/`), remakes the page from the whole ledger (`docs/`, served by Pages) and
+commits both to `main`.
+
+## The ledger
+
+`ledger.py` keeps every scenario result as a record: the machine, the outcome, when, and the commits of the Manager, the installers
+and QEngine it ran. `report.py` makes the page from the ledger: each cell is the newest result for that scenario on that machine,
+with its age and the last few results before it, marked when it ran code other than the commit under test (`--pm`, `--mpc-vst`), when
+its commit was not recorded, or when it both passed and failed on the same code (flaky). So the page can be made from many small
+runs instead of one full one.
+
+```
+python3 ledger.py add emu/results --pm ../plugin-manager --mpc-vst ../mpc-vst-plugins --qengine ../QEngine   # a local run
+python3 ledger.py add-art art --url <run url> --at <when>       # a compat run's downloaded results-* artifacts
+python3 ledger.py show --scenario self_update
+python3 report.py --pm open-mpc/plugin-manager@main             # out/site/index.html
+```
+
+Adding is idempotent: what is already in the ledger is not added again. The ledger is `ledger/` (records/ by month, one file per run;
+shots/, the screen captures, which `ledger.py prune-shots` trims to the latest result of each cell).
 
 ## Prebuilt machines
 
