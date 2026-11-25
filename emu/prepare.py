@@ -187,6 +187,12 @@ def prepare(instance, stage="work", fx=None, minfo=None):
         else:
             install_manager(vm, synths)
             add_location(vm, synths)
+        if minfo["arch"] != "aarch64":
+            # MPC OS's network MIDI service runs a realtime server under LimitRTTIME=1000 (1 ms of CPU without blocking). On an emulated
+            # Gen1 it goes over that, is killed (SIGKILL) and restarted (Restart=always) every few seconds: 18 restarts by 726 s of
+            # uptime on a hosted runner, against one on a desktop; and its device has no serial number. MPC's audio watchdog fired
+            # around those restarts (run 45689313859). Not part of what is tested: masked until the guest reboots.
+            vm.sh("systemctl stop az01-network-midi.service; systemctl mask --runtime az01-network-midi.service", check=False)
         vm.sh("rm -rf /tmp/openmpc-pm; systemctl start acvs")
         open_manager(vm)
         try: st = vm.state(60, lambda s: s.get("loaded") == 1 and s.get("online") == 1, "catalog loaded")
