@@ -96,7 +96,7 @@ def records_from(results, src, run, extra, fx, at=None):
         for r in d["scenarios"]:
             shots = sorted(glob.glob(os.path.join(os.path.dirname(f), r["scenario"], "*.png")))
             rec = {"run": run, "at": r.get("at") or at or utc(made), "instance": inst, "scenario": r["scenario"], "ok": r["ok"],
-                   "seconds": r["seconds"], "problems": r.get("problems", []), "findings": r.get("findings", []), "retried": r.get("retried", []), "doc": r.get("doc", ""),
+                   "seconds": r["seconds"], "problems": r.get("problems", []), "findings": r.get("findings", []), "retried": r.get("retried", []), "restores": r.get("restores", 1), "doc": r.get("doc", ""),
                    "pm": s.get("pm"), "mpc_vst": s.get("mpc_vst"), "qengine": s.get("qengine"),
                    "machine": p.get("machine"), "build": p.get("build"), "label": label, "firmware": p.get("firmware"),
                    "arch": p.get("arch"), "external_plugins": p.get("external_plugins", False)}

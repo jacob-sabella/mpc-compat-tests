@@ -168,9 +168,10 @@ def prepare(instance, stage="work", fx=None, minfo=None):
             raise
         if st["version"] != VERSION_A: raise Fail("the running Manager says version %s" % st["version"])
         vm.shot(os.path.join(vm.dir, "ready.png"))
+        kills = int(vm.out("journalctl -b --no-pager | grep -c 'killing thread by force' || true").strip() or 0)
         vm.savevm("ready")
         info = {k: minfo[k] for k in ("arch", "synths", "external_plugins", "boot_seconds", "mpc_seconds", "firmware")}
-        info.update(machine=minfo["id"], prepare_seconds=int(time.time() - t0))
+        info.update(machine=minfo["id"], prepare_seconds=int(time.time() - t0), kills=kills)   # run.py restored(): kills in the snapshot's journal
         log("%s: ready in %ds from the machine snapshot" % (instance, time.time() - t0))
         return info
     finally:

@@ -261,14 +261,39 @@ def run_one(instance, label, sc, info, fx, snapshot="ready", tclass=T, logs=(PM 
     return second
 
 
+# Gen1: some restores of a ready snapshot come back with MPC's audio thread past its watchdog's limit, and MPC kills it ("!! killing
+# thread by force !!") within seconds, before ssh answers and before the scenario has done anything. Other restores of the same
+# snapshot are fine. Seen in run 45667199378: four first attempts, each killed at the snapshot's own guest time (the thread
+# samples start after the kill), each passing on a second restore. So a Gen1 guest is checked RESTORE_CHECK seconds after it
+# comes up, and restored again (up to RESTORES times) when MPC was killed; the scenario starts only on a guest where it was not.
+RESTORE_CHECK, RESTORES = 8, 3
+
+
+def restored(instance, label, snapshot, info):
+    """A started VM from `snapshot`, and how many restores it took."""
+    for n in range(1, RESTORES + 1):
+        vm = emu.VM(instance, label)
+        try:
+            vm.start(snapshot)
+            if info.get("arch") == "aarch64": return vm, n
+            time.sleep(RESTORE_CHECK)
+            kills = int(vm.out("journalctl -b --no-pager | grep -c 'killing thread by force' || true").strip() or 0)
+        except BaseException:
+            vm.kill()
+            raise
+        if kills <= info.get("kills", 0) or n == RESTORES: return vm, n
+        log("%s: MPC's audio watchdog fired just after restore %d of the %s snapshot; restoring again" % (instance, n, snapshot))
+        vm.kill()
+
+
 def run_attempt(instance, label, sc, info, fx, snapshot, tclass, logs):
     out = os.path.join(HERE, "results", instance, label, sc.__name__)
     shutil.rmtree(out, ignore_errors=True); os.makedirs(out)
-    vm = emu.VM(instance, label)
-    t0 = time.time(); t = None
+    vm = None
+    t0 = time.time(); t = None; restores = 1
     try:
         fx.catalog()
-        vm.start(snapshot)
+        vm, restores = restored(instance, label, snapshot, info)
         if info.get("arch") != "aarch64": vm.sh(SAMPLER, check=False)
         t = tclass(vm, fx, info, out)
         sc(t)
@@ -278,7 +303,7 @@ def run_attempt(instance, label, sc, info, fx, snapshot, tclass, logs):
     except Exception:
         problems = (t.problems if t else []) + ["harness error: %s" % traceback.format_exc()[-800:]]
     try:
-        if vm.proc and vm.proc.poll() is None:
+        if vm and vm.proc and vm.proc.poll() is None:
             if problems and t: t.save_journal("end")
             vm.shot(os.path.join(out, "99-end.png"))
             for path in logs:
@@ -286,12 +311,13 @@ def run_attempt(instance, label, sc, info, fx, snapshot, tclass, logs):
                 if txt: open(os.path.join(out, "end-" + os.path.basename(path)), "w").write(txt)
     except Exception:
         pass
-    vm.kill()                               # no sync: the next scenario starts from the snapshot, and this guest's disk state is dropped
+    if vm: vm.kill()                        # no sync: the next scenario starts from the snapshot, and this guest's disk state is dropped
     secs = int(time.time() - t0)
     findings = t.findings if t else []
     log("%s %-28s %s (%ds)%s%s" % (instance, sc.__name__, "ok" if not problems else "FAILED", secs, "".join("\n      - " + p for p in problems),
                                   "".join("\n      * " + f for f in findings)))
     r = {"scenario": sc.__name__, "ok": not problems, "seconds": secs, "problems": problems, "doc": (sc.__doc__ or "").strip().split("\n")[0]}
+    if restores > 1: r["restores"] = restores
     if findings: r["findings"] = findings
     return r
 
