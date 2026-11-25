@@ -1,1077 +1,1736 @@
 {
- "build": "work",
- "machines": [
-  {
-   "instance": "mpc-sample-130",
-   "code": "AC50",
-   "device": "MPC Sample",
-   "firmware": "1.3.0.12",
-   "arch": "aarch64",
-   "external_plugins": false,
-   "image": "MPC_SAMPLE_1.3.0_UPDATE.exe",
-   "sha256": "417dc79c1baa9e35ed173757c15dc8e7249224775ee9389739814f657fea8b73",
-   "when": "2026-11-21T21:17:29.774519+00:00",
-   "results": {
-    "sample_install": {
-     "scenario": "sample_install",
-     "ok": true,
-     "seconds": 10,
-     "problems": [],
-     "doc": "A Sample-capable plugin (the aarch64 zip) installed with its own install.sh and no -t: it finds the SD card by itself. Files on"
-    },
-    "sample_plugin_loads": {
-     "scenario": "sample_plugin_loads",
-     "ok": true,
-     "seconds": 67,
-     "problems": [],
-     "doc": "The installed effect loads in MPC Sample once it is in the project (RACK's apply helper) and the card's Synths folder is bound",
-     "findings": [
-      "with the card noexec MPC logs only \"Attempting to load VST\" for the plugin and nothing after it: no message on the screen or in the log says it failed"
-     ]
-    },
-    "sample_reboot": {
-     "scenario": "sample_reboot",
-     "ok": true,
-     "seconds": 110,
-     "problems": [],
-     "doc": "The effect loading, then a reboot (a clean power-off and power-on): what is still there, and what MPC does with the plugin.",
-     "findings": [
-      "after a reboot the exec bind mount of /media/MPCSD/Synths is gone, so the plugin still in the project and in the settings is not loaded: MPC logs \"Attempting to load VST\" and nothing else, and nothing on the screen says so",
-      "after a reboot the addin installer's drop-in (in /run, as the root is read-only) is gone: MPC starts without the RACK addin until its install.sh is run again"
-     ]
-    },
-    "sample_uninstall": {
-     "scenario": "sample_uninstall",
-     "ok": true,
-     "seconds": 62,
-     "problems": [],
-     "doc": "The loaded effect removed with its own uninstall.sh: its folder and its settings entry go, MPC restarts and keeps running with"
-    },
-    "zip_install_by_hand": {
-     "scenario": "zip_install_by_hand",
-     "ok": true,
-     "seconds": 37,
-     "problems": [],
-     "doc": "A release zip's own install.sh and uninstall.sh run by hand with no -t (their default folder): install, update over the older"
-    },
-    "zip_install_by_hand_t": {
-     "scenario": "zip_install_by_hand_t",
-     "ok": true,
-     "seconds": 39,
-     "problems": [],
-     "doc": "The same with -t naming the folder MPC loads plugins from on this machine (VST2 Plugins on MPC OS 3.10.1, the card's Synths on a"
-    },
-    "zip_addin_by_hand": {
-     "scenario": "zip_addin_by_hand",
-     "ok": true,
-     "seconds": 36,
-     "problems": [],
-     "doc": "An addin's release zip installed with its install.sh (default folder, then -t) and removed with the uninstall.sh in its folder:"
-    },
-    "store_install_update_remove": {
-     "scenario": "store_install_update_remove",
-     "ok": true,
-     "seconds": 43,
-     "problems": [],
-     "doc": "mpc-store.sh with no -t (its default folder): install a plugin at its older version, update it, remove it. The plugin must end up"
-    },
-    "store_install_update_remove_t": {
-     "scenario": "store_install_update_remove_t",
-     "ok": true,
-     "seconds": 44,
-     "problems": [],
-     "doc": "The same with -t naming the folder MPC loads plugins from on this machine."
-    },
-    "store_list": {
-     "scenario": "store_list",
-     "ok": true,
-     "seconds": 4,
-     "problems": [],
-     "doc": "mpc-store.sh list, with and without -t: the catalog's newest versions, what is installed, a folder put there by hand as \"manual\","
-    },
-    "store_dependency": {
-     "scenario": "store_dependency",
-     "ok": true,
-     "seconds": 12,
-     "problems": [],
-     "doc": "mpc-store.sh -t: a plugin that needs another brings it at the catalog's pick; removing what it needs is refused with nothing"
-    },
-    "store_addin_install_remove": {
-     "scenario": "store_addin_install_remove",
-     "ok": true,
-     "seconds": 22,
-     "problems": [],
-     "doc": "mpc-store.sh: an addin installed (MPC preloads it), reported up to date, and removed."
-    },
-    "store_sync_prune": {
-     "scenario": "store_sync_prune",
-     "ok": true,
-     "seconds": 9,
-     "problems": [],
-     "doc": "mpc-store.sh sync registers a plugin folder copied by hand and drops the entry of one deleted by hand; prune keeps the newest"
-    },
-    "store_device_limited": {
-     "scenario": "store_device_limited",
-     "ok": true,
-     "seconds": 11,
-     "problems": [],
-     "doc": "Catalog entries limited by device: emu-fx is only for the MPC Sample (\"devices\": [\"mpc-sample\"]), emu-probe-out for every MPC."
-    },
-    "desktop_install_update_remove": {
-     "scenario": "desktop_install_update_remove",
-     "ok": true,
-     "seconds": 67,
-     "problems": [],
-     "doc": "The desktop installer app, driven over its local web API from the computer side, against the emulator's SSH: install a plugin"
-    },
-    "desktop_addin_install_remove": {
-     "scenario": "desktop_addin_install_remove",
-     "ok": true,
-     "seconds": 23,
-     "problems": [],
-     "doc": "The desktop app: an addin installed (MPC preloads it after the restart) and removed."
-    }
-   }
-  },
+ "made": "2026-11-25T13:39:26Z",
+ "target": {
+  "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+  "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1"
+ },
+ "cells": [
   {
    "instance": "mpc-g1-391",
-   "code": "ACVA",
-   "device": "MPC One",
-   "firmware": "3.9.1.2",
-   "arch": "armv7",
-   "external_plugins": false,
-   "image": "MPC-3.9.1-Gen1-update.img",
-   "sha256": "4c0f7797a006313fad206f9513eca8b3823e834c9e0941a6b5f088386cb835d6",
-   "when": "2026-11-21T21:17:29.724651+00:00",
-   "results": {
-    "fresh_install": {
-     "scenario": "fresh_install",
-     "ok": true,
-     "seconds": 9,
-     "problems": [],
-     "doc": "A fresh install of the Manager: MPC lists it, draws its skin, it reads the catalog and finds where to install."
-    },
-    "plugin_install_update_remove": {
-     "scenario": "plugin_install_update_remove",
-     "ok": true,
-     "seconds": 231,
-     "problems": [],
-     "doc": "Install a plugin with a tap, update it, remove it: files, MPC.settings and the result file each time."
-    },
-    "addin_install_remove": {
-     "scenario": "addin_install_remove",
-     "ok": true,
-     "seconds": 156,
-     "problems": [],
-     "doc": "Install an addin and remove it: its folder, MPC really preloading it after the restart, and MPC's own preloads kept."
-    },
-    "self_update": {
-     "scenario": "self_update",
-     "ok": true,
-     "seconds": 220,
-     "problems": [],
-     "doc": "The Manager updates itself: the new build is what MPC loads afterwards, with nothing left over."
-    },
-    "long_press": {
-     "scenario": "long_press",
-     "ok": true,
-     "seconds": 33,
-     "problems": [],
-     "doc": "A slow press on a button counts once. The skin bound each trigger twice (an action on touch-down, a Button on release), so a"
-    },
-    "theme_survives_update": {
-     "scenario": "theme_survives_update",
-     "ok": true,
-     "seconds": 330,
-     "problems": [],
-     "doc": "A user who chose the dark theme still has it after the Manager updates itself, with no second restart asked for."
-    },
-    "drive_name_with_space": {
-     "scenario": "drive_name_with_space",
-     "ok": true,
-     "seconds": 438,
-     "problems": [],
-     "doc": "An exFAT card called \"EMU CARD\" (big clusters, as cards come): register it, install to it, update, remove. On MPC OS 3.10.1+"
-    },
-    "exfat_noexec_drive": {
-     "scenario": "exfat_noexec_drive",
-     "ok": true,
-     "seconds": 164,
-     "problems": [],
-     "doc": "A drive MPC mounted noexec (a Force's SSD): the Manager says why its Synths folder cannot be used, and installs go to the"
-    },
-    "full_disk": {
-     "scenario": "full_disk",
-     "ok": true,
-     "seconds": 238,
-     "problems": [],
-     "doc": "The install drive fills up: the Manager says the drive is full, a plugin can still be removed to make room, MPC.settings stays"
-    },
-    "readonly_addins": {
-     "scenario": "readonly_addins",
-     "ok": true,
-     "seconds": 23,
-     "problems": [],
-     "doc": "/data/mpc-addins cannot be written: an addin is refused before MPC stops, with that as the reason; plugins still install."
-    },
-    "power_cut_mid_apply": {
-     "scenario": "power_cut_mid_apply",
-     "ok": true,
-     "seconds": 346,
-     "problems": [],
-     "doc": "Power is lost while an update is keeping its safety copy (#46). After the reboot the plugin is as it was, and the update"
-    },
-    "catalog_retry": {
-     "scenario": "catalog_retry",
-     "ok": true,
-     "seconds": 30,
-     "problems": [],
-     "doc": "The catalog cannot be reached at first (Wi-Fi still joining when MPC opens the project): the Manager tries again on its own."
-    },
-    "vst2_plugin_json": {
-     "scenario": "vst2_plugin_json",
-     "ok": true,
-     "seconds": 122,
-     "problems": [],
-     "doc": "The MPC OS 3.10.1 path: with External Plugin Support (VST2 Support) on, the Manager installs into \"<drive>/VST2 Plugins\" and"
-    },
-    "zip_install_by_hand": {
-     "scenario": "zip_install_by_hand",
-     "ok": true,
-     "seconds": 369,
-     "problems": [],
-     "doc": "A release zip's own install.sh and uninstall.sh run by hand with no -t (their default folder): install, update over the older"
-    },
-    "zip_install_by_hand_t": {
-     "scenario": "zip_install_by_hand_t",
-     "ok": true,
-     "seconds": 192,
-     "problems": [],
-     "doc": "The same with -t naming the folder MPC loads plugins from on this machine (VST2 Plugins on MPC OS 3.10.1, the card's Synths on a"
-    },
-    "zip_addin_by_hand": {
-     "scenario": "zip_addin_by_hand",
-     "ok": true,
-     "seconds": 98,
-     "problems": [],
-     "doc": "An addin's release zip installed with its install.sh (default folder, then -t) and removed with the uninstall.sh in its folder:"
-    },
-    "store_install_update_remove": {
-     "scenario": "store_install_update_remove",
-     "ok": true,
-     "seconds": 504,
-     "problems": [],
-     "doc": "mpc-store.sh with no -t (its default folder): install a plugin at its older version, update it, remove it. The plugin must end up"
-    },
-    "store_install_update_remove_t": {
-     "scenario": "store_install_update_remove_t",
-     "ok": true,
-     "seconds": 193,
-     "problems": [],
-     "doc": "The same with -t naming the folder MPC loads plugins from on this machine."
-    },
-    "store_list": {
-     "scenario": "store_list",
-     "ok": true,
-     "seconds": 68,
-     "problems": [],
-     "doc": "mpc-store.sh list, with and without -t: the catalog's newest versions, what is installed, a folder put there by hand as \"manual\","
-    },
-    "store_dependency": {
-     "scenario": "store_dependency",
-     "ok": true,
-     "seconds": 26,
-     "problems": [],
-     "doc": "mpc-store.sh -t: a plugin that needs another brings it at the catalog's pick; removing what it needs is refused with nothing"
-    },
-    "store_addin_install_remove": {
-     "scenario": "store_addin_install_remove",
-     "ok": true,
-     "seconds": 290,
-     "problems": [],
-     "doc": "mpc-store.sh: an addin installed (MPC preloads it), reported up to date, and removed."
-    },
-    "store_sync_prune": {
-     "scenario": "store_sync_prune",
-     "ok": true,
-     "seconds": 72,
-     "problems": [],
-     "doc": "mpc-store.sh sync registers a plugin folder copied by hand and drops the entry of one deleted by hand; prune keeps the newest"
-    },
-    "store_device_limited": {
-     "scenario": "store_device_limited",
-     "ok": true,
-     "seconds": 71,
-     "problems": [],
-     "doc": "Catalog entries limited by device: emu-fx is only for the MPC Sample (\"devices\": [\"mpc-sample\"]), emu-probe-out for every MPC."
-    },
-    "desktop_install_update_remove": {
-     "scenario": "desktop_install_update_remove",
-     "ok": true,
-     "seconds": 231,
-     "problems": [],
-     "doc": "The desktop installer app, driven over its local web API from the computer side, against the emulator's SSH: install a plugin"
-    },
-    "desktop_addin_install_remove": {
-     "scenario": "desktop_addin_install_remove",
-     "ok": true,
-     "seconds": 63,
-     "problems": [],
-     "doc": "The desktop app: an addin installed (MPC preloads it after the restart) and removed."
-    }
-   }
+   "scenario": "fresh_install",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": true,
+   "run": "gh-45235131001"
   },
   {
    "instance": "mpc-x-391",
-   "code": "ACV5",
-   "device": "MPC X",
-   "firmware": "3.9.1.2",
-   "arch": "armv7",
-   "external_plugins": false,
-   "image": "MPC-3.9.1-Gen1-update.img",
-   "sha256": "4c0f7797a006313fad206f9513eca8b3823e834c9e0941a6b5f088386cb835d6",
-   "when": "2026-11-21T21:17:29.674120+00:00",
-   "results": {
-    "fresh_install": {
-     "scenario": "fresh_install",
-     "ok": true,
-     "seconds": 8,
-     "problems": [],
-     "doc": "A fresh install of the Manager: MPC lists it, draws its skin, it reads the catalog and finds where to install."
-    },
-    "plugin_install_update_remove": {
-     "scenario": "plugin_install_update_remove",
-     "ok": true,
-     "seconds": 231,
-     "problems": [],
-     "doc": "Install a plugin with a tap, update it, remove it: files, MPC.settings and the result file each time."
-    },
-    "addin_install_remove": {
-     "scenario": "addin_install_remove",
-     "ok": true,
-     "seconds": 169,
-     "problems": [],
-     "doc": "Install an addin and remove it: its folder, MPC really preloading it after the restart, and MPC's own preloads kept."
-    },
-    "self_update": {
-     "scenario": "self_update",
-     "ok": true,
-     "seconds": 215,
-     "problems": [],
-     "doc": "The Manager updates itself: the new build is what MPC loads afterwards, with nothing left over."
-    },
-    "long_press": {
-     "scenario": "long_press",
-     "ok": true,
-     "seconds": 32,
-     "problems": [],
-     "doc": "A slow press on a button counts once. The skin bound each trigger twice (an action on touch-down, a Button on release), so a"
-    },
-    "theme_survives_update": {
-     "scenario": "theme_survives_update",
-     "ok": true,
-     "seconds": 332,
-     "problems": [],
-     "doc": "A user who chose the dark theme still has it after the Manager updates itself, with no second restart asked for."
-    },
-    "drive_name_with_space": {
-     "scenario": "drive_name_with_space",
-     "ok": true,
-     "seconds": 456,
-     "problems": [],
-     "doc": "An exFAT card called \"EMU CARD\" (big clusters, as cards come): register it, install to it, update, remove. On MPC OS 3.10.1+"
-    },
-    "exfat_noexec_drive": {
-     "scenario": "exfat_noexec_drive",
-     "ok": true,
-     "seconds": 163,
-     "problems": [],
-     "doc": "A drive MPC mounted noexec (a Force's SSD): the Manager says why its Synths folder cannot be used, and installs go to the"
-    },
-    "full_disk": {
-     "scenario": "full_disk",
-     "ok": true,
-     "seconds": 260,
-     "problems": [],
-     "doc": "The install drive fills up: the Manager says the drive is full, a plugin can still be removed to make room, MPC.settings stays"
-    },
-    "readonly_addins": {
-     "scenario": "readonly_addins",
-     "ok": true,
-     "seconds": 24,
-     "problems": [],
-     "doc": "/data/mpc-addins cannot be written: an addin is refused before MPC stops, with that as the reason; plugins still install."
-    },
-    "power_cut_mid_apply": {
-     "scenario": "power_cut_mid_apply",
-     "ok": true,
-     "seconds": 347,
-     "problems": [],
-     "doc": "Power is lost while an update is keeping its safety copy (#46). After the reboot the plugin is as it was, and the update"
-    },
-    "catalog_retry": {
-     "scenario": "catalog_retry",
-     "ok": true,
-     "seconds": 28,
-     "problems": [],
-     "doc": "The catalog cannot be reached at first (Wi-Fi still joining when MPC opens the project): the Manager tries again on its own."
-    },
-    "vst2_plugin_json": {
-     "scenario": "vst2_plugin_json",
-     "ok": true,
-     "seconds": 124,
-     "problems": [],
-     "doc": "The MPC OS 3.10.1 path: with External Plugin Support (VST2 Support) on, the Manager installs into \"<drive>/VST2 Plugins\" and"
-    },
-    "zip_install_by_hand": {
-     "scenario": "zip_install_by_hand",
-     "ok": true,
-     "seconds": 364,
-     "problems": [],
-     "doc": "A release zip's own install.sh and uninstall.sh run by hand with no -t (their default folder): install, update over the older"
-    },
-    "zip_install_by_hand_t": {
-     "scenario": "zip_install_by_hand_t",
-     "ok": true,
-     "seconds": 197,
-     "problems": [],
-     "doc": "The same with -t naming the folder MPC loads plugins from on this machine (VST2 Plugins on MPC OS 3.10.1, the card's Synths on a"
-    },
-    "zip_addin_by_hand": {
-     "scenario": "zip_addin_by_hand",
-     "ok": true,
-     "seconds": 113,
-     "problems": [],
-     "doc": "An addin's release zip installed with its install.sh (default folder, then -t) and removed with the uninstall.sh in its folder:"
-    },
-    "store_install_update_remove": {
-     "scenario": "store_install_update_remove",
-     "ok": true,
-     "seconds": 494,
-     "problems": [],
-     "doc": "mpc-store.sh with no -t (its default folder): install a plugin at its older version, update it, remove it. The plugin must end up"
-    },
-    "store_install_update_remove_t": {
-     "scenario": "store_install_update_remove_t",
-     "ok": true,
-     "seconds": 192,
-     "problems": [],
-     "doc": "The same with -t naming the folder MPC loads plugins from on this machine."
-    },
-    "store_list": {
-     "scenario": "store_list",
-     "ok": true,
-     "seconds": 69,
-     "problems": [],
-     "doc": "mpc-store.sh list, with and without -t: the catalog's newest versions, what is installed, a folder put there by hand as \"manual\","
-    },
-    "store_dependency": {
-     "scenario": "store_dependency",
-     "ok": true,
-     "seconds": 25,
-     "problems": [],
-     "doc": "mpc-store.sh -t: a plugin that needs another brings it at the catalog's pick; removing what it needs is refused with nothing"
-    },
-    "store_addin_install_remove": {
-     "scenario": "store_addin_install_remove",
-     "ok": true,
-     "seconds": 281,
-     "problems": [],
-     "doc": "mpc-store.sh: an addin installed (MPC preloads it), reported up to date, and removed."
-    },
-    "store_sync_prune": {
-     "scenario": "store_sync_prune",
-     "ok": true,
-     "seconds": 78,
-     "problems": [],
-     "doc": "mpc-store.sh sync registers a plugin folder copied by hand and drops the entry of one deleted by hand; prune keeps the newest"
-    },
-    "store_device_limited": {
-     "scenario": "store_device_limited",
-     "ok": true,
-     "seconds": 73,
-     "problems": [],
-     "doc": "Catalog entries limited by device: emu-fx is only for the MPC Sample (\"devices\": [\"mpc-sample\"]), emu-probe-out for every MPC."
-    },
-    "desktop_install_update_remove": {
-     "scenario": "desktop_install_update_remove",
-     "ok": true,
-     "seconds": 244,
-     "problems": [],
-     "doc": "The desktop installer app, driven over its local web API from the computer side, against the emulator's SSH: install a plugin"
-    },
-    "desktop_addin_install_remove": {
-     "scenario": "desktop_addin_install_remove",
-     "ok": true,
-     "seconds": 70,
-     "problems": [],
-     "doc": "The desktop app: an addin installed (MPC preloads it after the restart) and removed."
-    }
-   }
+   "scenario": "fresh_install",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
   },
   {
    "instance": "mpc-g2-3100",
-   "code": "ACVG",
-   "device": "MPC Live III",
-   "firmware": "3.10.0.49",
-   "arch": "aarch64",
-   "external_plugins": false,
-   "image": "MPC-3.10.0-Gen2-update.img",
-   "sha256": "c5b941e1b07d261a58b41784e2ff4f911b3ca4dd25969698eaa35aa706d9dec2",
-   "when": "2026-11-21T21:17:29.561206+00:00",
-   "results": {
-    "fresh_install": {
-     "scenario": "fresh_install",
-     "ok": true,
-     "seconds": 6,
-     "problems": [],
-     "doc": "A fresh install of the Manager: MPC lists it, draws its skin, it reads the catalog and finds where to install."
-    },
-    "plugin_install_update_remove": {
-     "scenario": "plugin_install_update_remove",
-     "ok": true,
-     "seconds": 176,
-     "problems": [],
-     "doc": "Install a plugin with a tap, update it, remove it: files, MPC.settings and the result file each time."
-    },
-    "addin_install_remove": {
-     "scenario": "addin_install_remove",
-     "ok": true,
-     "seconds": 107,
-     "problems": [],
-     "doc": "Install an addin and remove it: its folder, MPC really preloading it after the restart, and MPC's own preloads kept."
-    },
-    "self_update": {
-     "scenario": "self_update",
-     "ok": true,
-     "seconds": 113,
-     "problems": [],
-     "doc": "The Manager updates itself: the new build is what MPC loads afterwards, with nothing left over."
-    },
-    "long_press": {
-     "scenario": "long_press",
-     "ok": true,
-     "seconds": 33,
-     "problems": [],
-     "doc": "A slow press on a button counts once. The skin bound each trigger twice (an action on touch-down, a Button on release), so a"
-    },
-    "theme_survives_update": {
-     "scenario": "theme_survives_update",
-     "ok": true,
-     "seconds": 242,
-     "problems": [],
-     "doc": "A user who chose the dark theme still has it after the Manager updates itself, with no second restart asked for."
-    },
-    "drive_name_with_space": {
-     "scenario": "drive_name_with_space",
-     "ok": true,
-     "seconds": 355,
-     "problems": [],
-     "doc": "An exFAT card called \"EMU CARD\" (big clusters, as cards come): register it, install to it, update, remove. On MPC OS 3.10.1+"
-    },
-    "exfat_noexec_drive": {
-     "scenario": "exfat_noexec_drive",
-     "ok": true,
-     "seconds": 127,
-     "problems": [],
-     "doc": "A drive MPC mounted noexec (a Force's SSD): the Manager says why its Synths folder cannot be used, and installs go to the"
-    },
-    "full_disk": {
-     "scenario": "full_disk",
-     "ok": true,
-     "seconds": 184,
-     "problems": [],
-     "doc": "The install drive fills up: the Manager says the drive is full, a plugin can still be removed to make room, MPC.settings stays"
-    },
-    "readonly_addins": {
-     "scenario": "readonly_addins",
-     "ok": true,
-     "seconds": 14,
-     "problems": [],
-     "doc": "/data/mpc-addins cannot be written: an addin is refused before MPC stops, with that as the reason; plugins still install."
-    },
-    "power_cut_mid_apply": {
-     "scenario": "power_cut_mid_apply",
-     "ok": true,
-     "seconds": 222,
-     "problems": [],
-     "doc": "Power is lost while an update is keeping its safety copy (#46). After the reboot the plugin is as it was, and the update"
-    },
-    "catalog_retry": {
-     "scenario": "catalog_retry",
-     "ok": true,
-     "seconds": 26,
-     "problems": [],
-     "doc": "The catalog cannot be reached at first (Wi-Fi still joining when MPC opens the project): the Manager tries again on its own."
-    },
-    "vst2_plugin_json": {
-     "scenario": "vst2_plugin_json",
-     "ok": true,
-     "seconds": 86,
-     "problems": [],
-     "doc": "The MPC OS 3.10.1 path: with External Plugin Support (VST2 Support) on, the Manager installs into \"<drive>/VST2 Plugins\" and"
-    },
-    "zip_install_by_hand": {
-     "scenario": "zip_install_by_hand",
-     "ok": true,
-     "seconds": 310,
-     "problems": [],
-     "doc": "A release zip's own install.sh and uninstall.sh run by hand with no -t (their default folder): install, update over the older"
-    },
-    "zip_install_by_hand_t": {
-     "scenario": "zip_install_by_hand_t",
-     "ok": true,
-     "seconds": 81,
-     "problems": [],
-     "doc": "The same with -t naming the folder MPC loads plugins from on this machine (VST2 Plugins on MPC OS 3.10.1, the card's Synths on a"
-    },
-    "zip_addin_by_hand": {
-     "scenario": "zip_addin_by_hand",
-     "ok": true,
-     "seconds": 57,
-     "problems": [],
-     "doc": "An addin's release zip installed with its install.sh (default folder, then -t) and removed with the uninstall.sh in its folder:"
-    },
-    "store_install_update_remove": {
-     "scenario": "store_install_update_remove",
-     "ok": true,
-     "seconds": 606,
-     "problems": [],
-     "doc": "mpc-store.sh with no -t (its default folder): install a plugin at its older version, update it, remove it. The plugin must end up"
-    },
-    "store_install_update_remove_t": {
-     "scenario": "store_install_update_remove_t",
-     "ok": true,
-     "seconds": 92,
-     "problems": [],
-     "doc": "The same with -t naming the folder MPC loads plugins from on this machine."
-    },
-    "store_list": {
-     "scenario": "store_list",
-     "ok": true,
-     "seconds": 76,
-     "problems": [],
-     "doc": "mpc-store.sh list, with and without -t: the catalog's newest versions, what is installed, a folder put there by hand as \"manual\","
-    },
-    "store_dependency": {
-     "scenario": "store_dependency",
-     "ok": true,
-     "seconds": 18,
-     "problems": [],
-     "doc": "mpc-store.sh -t: a plugin that needs another brings it at the catalog's pick; removing what it needs is refused with nothing"
-    },
-    "store_addin_install_remove": {
-     "scenario": "store_addin_install_remove",
-     "ok": true,
-     "seconds": 368,
-     "problems": [],
-     "doc": "mpc-store.sh: an addin installed (MPC preloads it), reported up to date, and removed."
-    },
-    "store_sync_prune": {
-     "scenario": "store_sync_prune",
-     "ok": true,
-     "seconds": 93,
-     "problems": [],
-     "doc": "mpc-store.sh sync registers a plugin folder copied by hand and drops the entry of one deleted by hand; prune keeps the newest"
-    },
-    "store_device_limited": {
-     "scenario": "store_device_limited",
-     "ok": true,
-     "seconds": 83,
-     "problems": [],
-     "doc": "Catalog entries limited by device: emu-fx is only for the MPC Sample (\"devices\": [\"mpc-sample\"]), emu-probe-out for every MPC."
-    },
-    "desktop_install_update_remove": {
-     "scenario": "desktop_install_update_remove",
-     "ok": true,
-     "seconds": 153,
-     "problems": [],
-     "doc": "The desktop installer app, driven over its local web API from the computer side, against the emulator's SSH: install a plugin"
-    },
-    "desktop_addin_install_remove": {
-     "scenario": "desktop_addin_install_remove",
-     "ok": true,
-     "seconds": 36,
-     "problems": [],
-     "doc": "The desktop app: an addin installed (MPC preloads it after the restart) and removed."
-    }
-   }
+   "scenario": "fresh_install",
+   "ok": true,
+   "at": "2026-11-23T04:28:42Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45105440605"
   },
   {
    "instance": "mpc-g1-3101",
-   "code": "ACVA",
-   "device": "MPC One",
-   "firmware": "3.10.1.12",
-   "arch": "armv7",
-   "external_plugins": true,
-   "image": "MPC-3.10.1-Gen1-update.img",
-   "sha256": "1df320c8b4f8a5ce4f212a6b89d6009bed3e794278a0ecb0ed609a5f0bf55364",
-   "when": "2026-11-21T21:17:29.620200+00:00",
-   "results": {
-    "fresh_install": {
-     "scenario": "fresh_install",
-     "ok": true,
-     "seconds": 11,
-     "problems": [],
-     "doc": "A fresh install of the Manager: MPC lists it, draws its skin, it reads the catalog and finds where to install."
-    },
-    "plugin_install_update_remove": {
-     "scenario": "plugin_install_update_remove",
-     "ok": true,
-     "seconds": 244,
-     "problems": [],
-     "doc": "Install a plugin with a tap, update it, remove it: files, MPC.settings and the result file each time."
-    },
-    "addin_install_remove": {
-     "scenario": "addin_install_remove",
-     "ok": true,
-     "seconds": 164,
-     "problems": [],
-     "doc": "Install an addin and remove it: its folder, MPC really preloading it after the restart, and MPC's own preloads kept."
-    },
-    "self_update": {
-     "scenario": "self_update",
-     "ok": true,
-     "seconds": 221,
-     "problems": [],
-     "doc": "The Manager updates itself: the new build is what MPC loads afterwards, with nothing left over."
-    },
-    "long_press": {
-     "scenario": "long_press",
-     "ok": true,
-     "seconds": 31,
-     "problems": [],
-     "doc": "A slow press on a button counts once. The skin bound each trigger twice (an action on touch-down, a Button on release), so a"
-    },
-    "theme_survives_update": {
-     "scenario": "theme_survives_update",
-     "ok": true,
-     "seconds": 341,
-     "problems": [],
-     "doc": "A user who chose the dark theme still has it after the Manager updates itself, with no second restart asked for."
-    },
-    "drive_name_with_space": {
-     "scenario": "drive_name_with_space",
-     "ok": true,
-     "seconds": 243,
-     "problems": [],
-     "doc": "An exFAT card called \"EMU CARD\" (big clusters, as cards come): register it, install to it, update, remove. On MPC OS 3.10.1+"
-    },
-    "exfat_noexec_drive": {
-     "scenario": "exfat_noexec_drive",
-     "ok": true,
-     "seconds": 168,
-     "problems": [],
-     "doc": "A drive MPC mounted noexec (a Force's SSD): the Manager says why its Synths folder cannot be used, and installs go to the"
-    },
-    "full_disk": {
-     "scenario": "full_disk",
-     "ok": true,
-     "seconds": 268,
-     "problems": [],
-     "doc": "The install drive fills up: the Manager says the drive is full, a plugin can still be removed to make room, MPC.settings stays"
-    },
-    "readonly_addins": {
-     "scenario": "readonly_addins",
-     "ok": true,
-     "seconds": 25,
-     "problems": [],
-     "doc": "/data/mpc-addins cannot be written: an addin is refused before MPC stops, with that as the reason; plugins still install."
-    },
-    "power_cut_mid_apply": {
-     "scenario": "power_cut_mid_apply",
-     "ok": true,
-     "seconds": 351,
-     "problems": [],
-     "doc": "Power is lost while an update is keeping its safety copy (#46). After the reboot the plugin is as it was, and the update"
-    },
-    "catalog_retry": {
-     "scenario": "catalog_retry",
-     "ok": true,
-     "seconds": 28,
-     "problems": [],
-     "doc": "The catalog cannot be reached at first (Wi-Fi still joining when MPC opens the project): the Manager tries again on its own."
-    },
-    "vst2_plugin_json": {
-     "scenario": "vst2_plugin_json",
-     "ok": true,
-     "seconds": 25,
-     "problems": [],
-     "doc": "The MPC OS 3.10.1 path: with External Plugin Support (VST2 Support) on, the Manager installs into \"<drive>/VST2 Plugins\" and"
-    },
-    "zip_install_by_hand": {
-     "scenario": "zip_install_by_hand",
-     "ok": true,
-     "seconds": 187,
-     "problems": [],
-     "doc": "A release zip's own install.sh and uninstall.sh run by hand with no -t (their default folder): install, update over the older"
-    },
-    "zip_install_by_hand_t": {
-     "scenario": "zip_install_by_hand_t",
-     "ok": true,
-     "seconds": 120,
-     "problems": [],
-     "doc": "The same with -t naming the folder MPC loads plugins from on this machine (VST2 Plugins on MPC OS 3.10.1, the card's Synths on a"
-    },
-    "zip_addin_by_hand": {
-     "scenario": "zip_addin_by_hand",
-     "ok": true,
-     "seconds": 121,
-     "problems": [],
-     "doc": "An addin's release zip installed with its install.sh (default folder, then -t) and removed with the uninstall.sh in its folder:"
-    },
-    "store_install_update_remove": {
-     "scenario": "store_install_update_remove",
-     "ok": true,
-     "seconds": 395,
-     "problems": [],
-     "doc": "mpc-store.sh with no -t (its default folder): install a plugin at its older version, update it, remove it. The plugin must end up"
-    },
-    "store_install_update_remove_t": {
-     "scenario": "store_install_update_remove_t",
-     "ok": true,
-     "seconds": 130,
-     "problems": [],
-     "doc": "The same with -t naming the folder MPC loads plugins from on this machine."
-    },
-    "store_list": {
-     "scenario": "store_list",
-     "ok": true,
-     "seconds": 76,
-     "problems": [],
-     "doc": "mpc-store.sh list, with and without -t: the catalog's newest versions, what is installed, a folder put there by hand as \"manual\","
-    },
-    "store_dependency": {
-     "scenario": "store_dependency",
-     "ok": true,
-     "seconds": 26,
-     "problems": [],
-     "doc": "mpc-store.sh -t: a plugin that needs another brings it at the catalog's pick; removing what it needs is refused with nothing"
-    },
-    "store_addin_install_remove": {
-     "scenario": "store_addin_install_remove",
-     "ok": true,
-     "seconds": 283,
-     "problems": [],
-     "doc": "mpc-store.sh: an addin installed (MPC preloads it), reported up to date, and removed."
-    },
-    "store_sync_prune": {
-     "scenario": "store_sync_prune",
-     "ok": true,
-     "seconds": 83,
-     "problems": [],
-     "doc": "mpc-store.sh sync registers a plugin folder copied by hand and drops the entry of one deleted by hand; prune keeps the newest"
-    },
-    "store_device_limited": {
-     "scenario": "store_device_limited",
-     "ok": true,
-     "seconds": 80,
-     "problems": [],
-     "doc": "Catalog entries limited by device: emu-fx is only for the MPC Sample (\"devices\": [\"mpc-sample\"]), emu-probe-out for every MPC."
-    },
-    "desktop_install_update_remove": {
-     "scenario": "desktop_install_update_remove",
-     "ok": true,
-     "seconds": 237,
-     "problems": [],
-     "doc": "The desktop installer app, driven over its local web API from the computer side, against the emulator's SSH: install a plugin"
-    },
-    "desktop_addin_install_remove": {
-     "scenario": "desktop_addin_install_remove",
-     "ok": true,
-     "seconds": 68,
-     "problems": [],
-     "doc": "The desktop app: an addin installed (MPC preloads it after the restart) and removed."
-    }
-   }
+   "scenario": "fresh_install",
+   "ok": true,
+   "at": "2026-11-24T23:12:41Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45505432027"
   },
   {
    "instance": "mpc-g2-3101",
-   "code": "ACVG",
-   "device": "MPC Live III",
-   "firmware": "3.10.1.12",
-   "arch": "aarch64",
-   "external_plugins": true,
-   "image": "MPC-3.10.1-Gen2-update.img",
-   "sha256": "b24857470114d354e370ffaecfb44a83ed435bf7dff65d8b982ebc8cac475b0a",
-   "when": "2026-11-21T21:17:29.508454+00:00",
-   "results": {
-    "fresh_install": {
-     "scenario": "fresh_install",
-     "ok": true,
-     "seconds": 8,
-     "problems": [],
-     "doc": "A fresh install of the Manager: MPC lists it, draws its skin, it reads the catalog and finds where to install."
-    },
-    "plugin_install_update_remove": {
-     "scenario": "plugin_install_update_remove",
-     "ok": true,
-     "seconds": 236,
-     "problems": [],
-     "doc": "Install a plugin with a tap, update it, remove it: files, MPC.settings and the result file each time."
-    },
-    "addin_install_remove": {
-     "scenario": "addin_install_remove",
-     "ok": true,
-     "seconds": 109,
-     "problems": [],
-     "doc": "Install an addin and remove it: its folder, MPC really preloading it after the restart, and MPC's own preloads kept."
-    },
-    "self_update": {
-     "scenario": "self_update",
-     "ok": true,
-     "seconds": 106,
-     "problems": [],
-     "doc": "The Manager updates itself: the new build is what MPC loads afterwards, with nothing left over."
-    },
-    "long_press": {
-     "scenario": "long_press",
-     "ok": true,
-     "seconds": 31,
-     "problems": [],
-     "doc": "A slow press on a button counts once. The skin bound each trigger twice (an action on touch-down, a Button on release), so a"
-    },
-    "theme_survives_update": {
-     "scenario": "theme_survives_update",
-     "ok": true,
-     "seconds": 240,
-     "problems": [],
-     "doc": "A user who chose the dark theme still has it after the Manager updates itself, with no second restart asked for."
-    },
-    "drive_name_with_space": {
-     "scenario": "drive_name_with_space",
-     "ok": true,
-     "seconds": 177,
-     "problems": [],
-     "doc": "An exFAT card called \"EMU CARD\" (big clusters, as cards come): register it, install to it, update, remove. On MPC OS 3.10.1+"
-    },
-    "exfat_noexec_drive": {
-     "scenario": "exfat_noexec_drive",
-     "ok": true,
-     "seconds": 127,
-     "problems": [],
-     "doc": "A drive MPC mounted noexec (a Force's SSD): the Manager says why its Synths folder cannot be used, and installs go to the"
-    },
-    "full_disk": {
-     "scenario": "full_disk",
-     "ok": true,
-     "seconds": 186,
-     "problems": [],
-     "doc": "The install drive fills up: the Manager says the drive is full, a plugin can still be removed to make room, MPC.settings stays"
-    },
-    "readonly_addins": {
-     "scenario": "readonly_addins",
-     "ok": true,
-     "seconds": 14,
-     "problems": [],
-     "doc": "/data/mpc-addins cannot be written: an addin is refused before MPC stops, with that as the reason; plugins still install."
-    },
-    "power_cut_mid_apply": {
-     "scenario": "power_cut_mid_apply",
-     "ok": true,
-     "seconds": 227,
-     "problems": [],
-     "doc": "Power is lost while an update is keeping its safety copy (#46). After the reboot the plugin is as it was, and the update"
-    },
-    "catalog_retry": {
-     "scenario": "catalog_retry",
-     "ok": true,
-     "seconds": 25,
-     "problems": [],
-     "doc": "The catalog cannot be reached at first (Wi-Fi still joining when MPC opens the project): the Manager tries again on its own."
-    },
-    "vst2_plugin_json": {
-     "scenario": "vst2_plugin_json",
-     "ok": true,
-     "seconds": 16,
-     "problems": [],
-     "doc": "The MPC OS 3.10.1 path: with External Plugin Support (VST2 Support) on, the Manager installs into \"<drive>/VST2 Plugins\" and"
-    },
-    "zip_install_by_hand": {
-     "scenario": "zip_install_by_hand",
-     "ok": true,
-     "seconds": 224,
-     "problems": [],
-     "doc": "A release zip's own install.sh and uninstall.sh run by hand with no -t (their default folder): install, update over the older"
-    },
-    "zip_install_by_hand_t": {
-     "scenario": "zip_install_by_hand_t",
-     "ok": true,
-     "seconds": 75,
-     "problems": [],
-     "doc": "The same with -t naming the folder MPC loads plugins from on this machine (VST2 Plugins on MPC OS 3.10.1, the card's Synths on a"
-    },
-    "zip_addin_by_hand": {
-     "scenario": "zip_addin_by_hand",
-     "ok": true,
-     "seconds": 47,
-     "problems": [],
-     "doc": "An addin's release zip installed with its install.sh (default folder, then -t) and removed with the uninstall.sh in its folder:"
-    },
-    "store_install_update_remove": {
-     "scenario": "store_install_update_remove",
-     "ok": true,
-     "seconds": 560,
-     "problems": [],
-     "doc": "mpc-store.sh with no -t (its default folder): install a plugin at its older version, update it, remove it. The plugin must end up"
-    },
-    "store_install_update_remove_t": {
-     "scenario": "store_install_update_remove_t",
-     "ok": true,
-     "seconds": 94,
-     "problems": [],
-     "doc": "The same with -t naming the folder MPC loads plugins from on this machine."
-    },
-    "store_list": {
-     "scenario": "store_list",
-     "ok": true,
-     "seconds": 111,
-     "problems": [],
-     "doc": "mpc-store.sh list, with and without -t: the catalog's newest versions, what is installed, a folder put there by hand as \"manual\","
-    },
-    "store_dependency": {
-     "scenario": "store_dependency",
-     "ok": true,
-     "seconds": 18,
-     "problems": [],
-     "doc": "mpc-store.sh -t: a plugin that needs another brings it at the catalog's pick; removing what it needs is refused with nothing"
-    },
-    "store_addin_install_remove": {
-     "scenario": "store_addin_install_remove",
-     "ok": true,
-     "seconds": 369,
-     "problems": [],
-     "doc": "mpc-store.sh: an addin installed (MPC preloads it), reported up to date, and removed."
-    },
-    "store_sync_prune": {
-     "scenario": "store_sync_prune",
-     "ok": true,
-     "seconds": 124,
-     "problems": [],
-     "doc": "mpc-store.sh sync registers a plugin folder copied by hand and drops the entry of one deleted by hand; prune keeps the newest"
-    },
-    "store_device_limited": {
-     "scenario": "store_device_limited",
-     "ok": true,
-     "seconds": 120,
-     "problems": [],
-     "doc": "Catalog entries limited by device: emu-fx is only for the MPC Sample (\"devices\": [\"mpc-sample\"]), emu-probe-out for every MPC."
-    },
-    "desktop_install_update_remove": {
-     "scenario": "desktop_install_update_remove",
-     "ok": true,
-     "seconds": 148,
-     "problems": [],
-     "doc": "The desktop installer app, driven over its local web API from the computer side, against the emulator's SSH: install a plugin"
-    },
-    "desktop_addin_install_remove": {
-     "scenario": "desktop_addin_install_remove",
-     "ok": true,
-     "seconds": 36,
-     "problems": [],
-     "doc": "The desktop app: an addin installed (MPC preloads it after the restart) and removed."
-    }
-   }
+   "scenario": "fresh_install",
+   "ok": true,
+   "at": "2026-11-24T23:12:41Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45505432027"
+  },
+  {
+   "instance": "mpc-g1-391",
+   "scenario": "plugin_install_update_remove",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": true,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-x-391",
+   "scenario": "plugin_install_update_remove",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3100",
+   "scenario": "plugin_install_update_remove",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g1-3101",
+   "scenario": "plugin_install_update_remove",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3101",
+   "scenario": "plugin_install_update_remove",
+   "ok": true,
+   "at": "2026-11-24T23:12:41Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45505432027"
+  },
+  {
+   "instance": "mpc-g1-391",
+   "scenario": "addin_install_remove",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-x-391",
+   "scenario": "addin_install_remove",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3100",
+   "scenario": "addin_install_remove",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g1-3101",
+   "scenario": "addin_install_remove",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3101",
+   "scenario": "addin_install_remove",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g1-391",
+   "scenario": "self_update",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-x-391",
+   "scenario": "self_update",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3100",
+   "scenario": "self_update",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g1-3101",
+   "scenario": "self_update",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3101",
+   "scenario": "self_update",
+   "ok": true,
+   "at": "2026-11-24T23:12:41Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45505432027"
+  },
+  {
+   "instance": "mpc-g1-391",
+   "scenario": "long_press",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-x-391",
+   "scenario": "long_press",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3100",
+   "scenario": "long_press",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g1-3101",
+   "scenario": "long_press",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": true,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3101",
+   "scenario": "long_press",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g1-391",
+   "scenario": "theme_survives_update",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-x-391",
+   "scenario": "theme_survives_update",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3100",
+   "scenario": "theme_survives_update",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g1-3101",
+   "scenario": "theme_survives_update",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3101",
+   "scenario": "theme_survives_update",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g1-391",
+   "scenario": "drive_name_with_space",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": true,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-x-391",
+   "scenario": "drive_name_with_space",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": true,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3100",
+   "scenario": "drive_name_with_space",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g1-3101",
+   "scenario": "drive_name_with_space",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3101",
+   "scenario": "drive_name_with_space",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g1-391",
+   "scenario": "exfat_noexec_drive",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-x-391",
+   "scenario": "exfat_noexec_drive",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3100",
+   "scenario": "exfat_noexec_drive",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g1-3101",
+   "scenario": "exfat_noexec_drive",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3101",
+   "scenario": "exfat_noexec_drive",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g1-391",
+   "scenario": "full_disk",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": true,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-x-391",
+   "scenario": "full_disk",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": true,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3100",
+   "scenario": "full_disk",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g1-3101",
+   "scenario": "full_disk",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3101",
+   "scenario": "full_disk",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g1-391",
+   "scenario": "readonly_addins",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-x-391",
+   "scenario": "readonly_addins",
+   "ok": true,
+   "at": "2026-11-23T04:28:42Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45105440605"
+  },
+  {
+   "instance": "mpc-g2-3100",
+   "scenario": "readonly_addins",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g1-3101",
+   "scenario": "readonly_addins",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3101",
+   "scenario": "readonly_addins",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g1-391",
+   "scenario": "power_cut_mid_apply",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-x-391",
+   "scenario": "power_cut_mid_apply",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3100",
+   "scenario": "power_cut_mid_apply",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g1-3101",
+   "scenario": "power_cut_mid_apply",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3101",
+   "scenario": "power_cut_mid_apply",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g1-391",
+   "scenario": "catalog_retry",
+   "ok": false,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": true,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-x-391",
+   "scenario": "catalog_retry",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": true,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3100",
+   "scenario": "catalog_retry",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g1-3101",
+   "scenario": "catalog_retry",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": true,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3101",
+   "scenario": "catalog_retry",
+   "ok": true,
+   "at": "2026-11-24T23:12:41Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45505432027"
+  },
+  {
+   "instance": "mpc-g1-391",
+   "scenario": "vst2_plugin_json",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-x-391",
+   "scenario": "vst2_plugin_json",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3100",
+   "scenario": "vst2_plugin_json",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g1-3101",
+   "scenario": "vst2_plugin_json",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3101",
+   "scenario": "vst2_plugin_json",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g1-391",
+   "scenario": "zip_install_by_hand",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-x-391",
+   "scenario": "zip_install_by_hand",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3100",
+   "scenario": "zip_install_by_hand",
+   "ok": true,
+   "at": "2026-11-23T04:28:42Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45105440605"
+  },
+  {
+   "instance": "mpc-g1-3101",
+   "scenario": "zip_install_by_hand",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3101",
+   "scenario": "zip_install_by_hand",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-sample-130",
+   "scenario": "zip_install_by_hand",
+   "ok": true,
+   "at": "2026-11-24T18:55:24Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": null,
+   "current": null,
+   "flaky": false,
+   "run": "local-backfill"
+  },
+  {
+   "instance": "mpc-sample-140",
+   "scenario": "zip_install_by_hand",
+   "ok": true,
+   "at": "2026-11-24T18:55:24Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": null,
+   "current": null,
+   "flaky": false,
+   "run": "local-backfill"
+  },
+  {
+   "instance": "mpc-g1-391",
+   "scenario": "zip_install_by_hand_t",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-x-391",
+   "scenario": "zip_install_by_hand_t",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3100",
+   "scenario": "zip_install_by_hand_t",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g1-3101",
+   "scenario": "zip_install_by_hand_t",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3101",
+   "scenario": "zip_install_by_hand_t",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-sample-130",
+   "scenario": "zip_install_by_hand_t",
+   "ok": true,
+   "at": "2026-11-24T18:55:24Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": null,
+   "current": null,
+   "flaky": false,
+   "run": "local-backfill"
+  },
+  {
+   "instance": "mpc-sample-140",
+   "scenario": "zip_install_by_hand_t",
+   "ok": true,
+   "at": "2026-11-24T18:55:24Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": null,
+   "current": null,
+   "flaky": false,
+   "run": "local-backfill"
+  },
+  {
+   "instance": "mpc-g1-391",
+   "scenario": "zip_addin_by_hand",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-x-391",
+   "scenario": "zip_addin_by_hand",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3100",
+   "scenario": "zip_addin_by_hand",
+   "ok": true,
+   "at": "2026-11-23T04:28:42Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45105440605"
+  },
+  {
+   "instance": "mpc-g1-3101",
+   "scenario": "zip_addin_by_hand",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3101",
+   "scenario": "zip_addin_by_hand",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-sample-130",
+   "scenario": "zip_addin_by_hand",
+   "ok": true,
+   "at": "2026-11-24T18:55:24Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": null,
+   "current": null,
+   "flaky": false,
+   "run": "local-backfill"
+  },
+  {
+   "instance": "mpc-sample-140",
+   "scenario": "zip_addin_by_hand",
+   "ok": true,
+   "at": "2026-11-24T18:55:24Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": null,
+   "current": null,
+   "flaky": false,
+   "run": "local-backfill"
+  },
+  {
+   "instance": "mpc-g1-391",
+   "scenario": "store_install_update_remove",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-x-391",
+   "scenario": "store_install_update_remove",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3100",
+   "scenario": "store_install_update_remove",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g1-3101",
+   "scenario": "store_install_update_remove",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3101",
+   "scenario": "store_install_update_remove",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-sample-130",
+   "scenario": "store_install_update_remove",
+   "ok": true,
+   "at": "2026-11-24T18:55:24Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": null,
+   "current": null,
+   "flaky": false,
+   "run": "local-backfill"
+  },
+  {
+   "instance": "mpc-sample-140",
+   "scenario": "store_install_update_remove",
+   "ok": true,
+   "at": "2026-11-24T18:55:24Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": null,
+   "current": null,
+   "flaky": false,
+   "run": "local-backfill"
+  },
+  {
+   "instance": "mpc-g1-391",
+   "scenario": "store_install_update_remove_t",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-x-391",
+   "scenario": "store_install_update_remove_t",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3100",
+   "scenario": "store_install_update_remove_t",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g1-3101",
+   "scenario": "store_install_update_remove_t",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3101",
+   "scenario": "store_install_update_remove_t",
+   "ok": true,
+   "at": "2026-11-24T23:12:41Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45505432027"
+  },
+  {
+   "instance": "mpc-sample-130",
+   "scenario": "store_install_update_remove_t",
+   "ok": true,
+   "at": "2026-11-24T18:55:24Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": null,
+   "current": null,
+   "flaky": false,
+   "run": "local-backfill"
+  },
+  {
+   "instance": "mpc-sample-140",
+   "scenario": "store_install_update_remove_t",
+   "ok": true,
+   "at": "2026-11-24T18:55:24Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": null,
+   "current": null,
+   "flaky": false,
+   "run": "local-backfill"
+  },
+  {
+   "instance": "mpc-g1-391",
+   "scenario": "store_list",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-x-391",
+   "scenario": "store_list",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3100",
+   "scenario": "store_list",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g1-3101",
+   "scenario": "store_list",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3101",
+   "scenario": "store_list",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-sample-130",
+   "scenario": "store_list",
+   "ok": true,
+   "at": "2026-11-24T18:55:24Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": null,
+   "current": null,
+   "flaky": false,
+   "run": "local-backfill"
+  },
+  {
+   "instance": "mpc-sample-140",
+   "scenario": "store_list",
+   "ok": true,
+   "at": "2026-11-24T18:55:24Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": null,
+   "current": null,
+   "flaky": false,
+   "run": "local-backfill"
+  },
+  {
+   "instance": "mpc-g1-391",
+   "scenario": "store_dependency",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-x-391",
+   "scenario": "store_dependency",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3100",
+   "scenario": "store_dependency",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g1-3101",
+   "scenario": "store_dependency",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3101",
+   "scenario": "store_dependency",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-sample-130",
+   "scenario": "store_dependency",
+   "ok": true,
+   "at": "2026-11-24T18:55:24Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": null,
+   "current": null,
+   "flaky": false,
+   "run": "local-backfill"
+  },
+  {
+   "instance": "mpc-sample-140",
+   "scenario": "store_dependency",
+   "ok": true,
+   "at": "2026-11-24T18:55:24Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": null,
+   "current": null,
+   "flaky": false,
+   "run": "local-backfill"
+  },
+  {
+   "instance": "mpc-g1-391",
+   "scenario": "store_addin_install_remove",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-x-391",
+   "scenario": "store_addin_install_remove",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3100",
+   "scenario": "store_addin_install_remove",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g1-3101",
+   "scenario": "store_addin_install_remove",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3101",
+   "scenario": "store_addin_install_remove",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-sample-130",
+   "scenario": "store_addin_install_remove",
+   "ok": true,
+   "at": "2026-11-24T18:55:24Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": null,
+   "current": null,
+   "flaky": false,
+   "run": "local-backfill"
+  },
+  {
+   "instance": "mpc-sample-140",
+   "scenario": "store_addin_install_remove",
+   "ok": true,
+   "at": "2026-11-24T18:55:24Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": null,
+   "current": null,
+   "flaky": false,
+   "run": "local-backfill"
+  },
+  {
+   "instance": "mpc-g1-391",
+   "scenario": "store_sync_prune",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-x-391",
+   "scenario": "store_sync_prune",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3100",
+   "scenario": "store_sync_prune",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g1-3101",
+   "scenario": "store_sync_prune",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3101",
+   "scenario": "store_sync_prune",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-sample-130",
+   "scenario": "store_sync_prune",
+   "ok": true,
+   "at": "2026-11-24T18:55:24Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": null,
+   "current": null,
+   "flaky": false,
+   "run": "local-backfill"
+  },
+  {
+   "instance": "mpc-sample-140",
+   "scenario": "store_sync_prune",
+   "ok": true,
+   "at": "2026-11-24T18:55:24Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": null,
+   "current": null,
+   "flaky": false,
+   "run": "local-backfill"
+  },
+  {
+   "instance": "mpc-g1-391",
+   "scenario": "store_device_limited",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-x-391",
+   "scenario": "store_device_limited",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3100",
+   "scenario": "store_device_limited",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g1-3101",
+   "scenario": "store_device_limited",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3101",
+   "scenario": "store_device_limited",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-sample-130",
+   "scenario": "store_device_limited",
+   "ok": true,
+   "at": "2026-11-24T18:55:24Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": null,
+   "current": null,
+   "flaky": false,
+   "run": "local-backfill"
+  },
+  {
+   "instance": "mpc-sample-140",
+   "scenario": "store_device_limited",
+   "ok": true,
+   "at": "2026-11-24T18:55:24Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": null,
+   "current": null,
+   "flaky": false,
+   "run": "local-backfill"
+  },
+  {
+   "instance": "mpc-g1-391",
+   "scenario": "desktop_install_update_remove",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-x-391",
+   "scenario": "desktop_install_update_remove",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3100",
+   "scenario": "desktop_install_update_remove",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g1-3101",
+   "scenario": "desktop_install_update_remove",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3101",
+   "scenario": "desktop_install_update_remove",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-sample-130",
+   "scenario": "desktop_install_update_remove",
+   "ok": true,
+   "at": "2026-11-24T18:55:24Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": null,
+   "current": null,
+   "flaky": false,
+   "run": "local-backfill"
+  },
+  {
+   "instance": "mpc-sample-140",
+   "scenario": "desktop_install_update_remove",
+   "ok": true,
+   "at": "2026-11-24T18:55:24Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": null,
+   "current": null,
+   "flaky": false,
+   "run": "local-backfill"
+  },
+  {
+   "instance": "mpc-g1-391",
+   "scenario": "desktop_addin_install_remove",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-x-391",
+   "scenario": "desktop_addin_install_remove",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3100",
+   "scenario": "desktop_addin_install_remove",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g1-3101",
+   "scenario": "desktop_addin_install_remove",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-g2-3101",
+   "scenario": "desktop_addin_install_remove",
+   "ok": true,
+   "at": "2026-11-23T19:15:10Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": "45ec43df8d077a9557ff40958f7a47a3de3473d1",
+   "current": true,
+   "flaky": false,
+   "run": "gh-45235131001"
+  },
+  {
+   "instance": "mpc-sample-130",
+   "scenario": "desktop_addin_install_remove",
+   "ok": true,
+   "at": "2026-11-24T18:55:24Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": null,
+   "current": null,
+   "flaky": false,
+   "run": "local-backfill"
+  },
+  {
+   "instance": "mpc-sample-140",
+   "scenario": "desktop_addin_install_remove",
+   "ok": true,
+   "at": "2026-11-24T18:55:24Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": null,
+   "current": null,
+   "flaky": false,
+   "run": "local-backfill"
+  },
+  {
+   "instance": "mpc-sample-130",
+   "scenario": "sample_install",
+   "ok": true,
+   "at": "2026-11-24T18:55:24Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": null,
+   "current": null,
+   "flaky": false,
+   "run": "local-backfill"
+  },
+  {
+   "instance": "mpc-sample-140",
+   "scenario": "sample_install",
+   "ok": true,
+   "at": "2026-11-24T18:55:24Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": null,
+   "current": null,
+   "flaky": false,
+   "run": "local-backfill"
+  },
+  {
+   "instance": "mpc-sample-130",
+   "scenario": "sample_plugin_loads",
+   "ok": true,
+   "at": "2026-11-24T18:55:24Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": null,
+   "current": null,
+   "flaky": false,
+   "run": "local-backfill"
+  },
+  {
+   "instance": "mpc-sample-140",
+   "scenario": "sample_plugin_loads",
+   "ok": true,
+   "at": "2026-11-24T18:55:24Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": null,
+   "current": null,
+   "flaky": false,
+   "run": "local-backfill"
+  },
+  {
+   "instance": "mpc-sample-130",
+   "scenario": "sample_reboot",
+   "ok": true,
+   "at": "2026-11-24T18:55:24Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": null,
+   "current": null,
+   "flaky": false,
+   "run": "local-backfill"
+  },
+  {
+   "instance": "mpc-sample-140",
+   "scenario": "sample_reboot",
+   "ok": true,
+   "at": "2026-11-24T18:55:24Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": null,
+   "current": null,
+   "flaky": false,
+   "run": "local-backfill"
+  },
+  {
+   "instance": "mpc-sample-130",
+   "scenario": "sample_uninstall",
+   "ok": true,
+   "at": "2026-11-24T18:55:24Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": null,
+   "current": null,
+   "flaky": false,
+   "run": "local-backfill"
+  },
+  {
+   "instance": "mpc-sample-140",
+   "scenario": "sample_uninstall",
+   "ok": true,
+   "at": "2026-11-24T18:55:24Z",
+   "pm": "bd3c23003f14787881b9c45000dd57642a633149",
+   "mpc_vst": null,
+   "current": null,
+   "flaky": false,
+   "run": "local-backfill"
   }
  ]
 }
