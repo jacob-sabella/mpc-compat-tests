@@ -140,31 +140,6 @@ def open_plugin(vm, plugin="Plugin Manager", vendor="OpenMPC", done=None, secs=4
         raise
 
 
-# Under emulation a Gen1 MPC can stall its audio thread in the first minute after it loads the Manager: MPC's audio watchdog then
-# kills it ("!! killing thread by force !!", "FATAL: exception not rethrown") and MPC exits (191). Seen 34 to 70 s after
-# "Initialising VST" on hosted runners (compat runs 45105440605, 45635047085), so inside the ready snapshot when that was saved as
-# soon as the catalog loaded: every scenario started from it hit the same kill at the same guest time, and a retry from the same
-# snapshot hit it again. The snapshot is saved only after MPC has run SETTLE seconds with the Manager open, unkilled.
-SETTLE = int(os.environ.get("PM_EMU_SETTLE", "90"))
-SETTLE_TRIES = 3
-KILLED = "killing thread by force"
-
-
-def settled(vm, instance):
-    """MPC still the process that opened the Manager, SETTLE seconds on, and not killed by its watchdog. When it was, wait for
-    systemd to start it again (acvs.service, Restart=always) and return False: the caller opens the Manager again."""
-    pid = vm.out("pidof MPC || true").strip()
-    kills = int(vm.out("journalctl -b --no-pager | grep -c '%s' || true" % KILLED).strip() or 0)
-    time.sleep(SETTLE)
-    now = vm.out("pidof MPC || true").strip()
-    after = int(vm.out("journalctl -b --no-pager | grep -c '%s' || true" % KILLED).strip() or 0)
-    if now and now == pid and after == kills: return True
-    log("%s: MPC's audio watchdog killed MPC within %ds of the Manager opening (pid %s, now %s): opening it again" % (instance, SETTLE, pid, now or "none"))
-    until = time.time() + 120
-    while not vm.out("pidof MPC || true").strip() and time.time() < until: time.sleep(3)
-    return False
-
-
 def prepare(instance, stage="work", fx=None, minfo=None):
     """From the machine snapshot (machine.py; made first if it is missing or out of date), install the Manager build `stage` and leave
     a "ready" snapshot in that stage. Returns what a test needs to know about the machine."""
@@ -186,14 +161,11 @@ def prepare(instance, stage="work", fx=None, minfo=None):
             install_manager(vm, synths)
             add_location(vm, synths)
         vm.sh("rm -rf /tmp/openmpc-pm; systemctl start acvs")
-        for attempt in range(1, SETTLE_TRIES + 1):
-            open_manager(vm)
-            try: st = vm.state(60, lambda s: s.get("loaded") == 1 and s.get("online") == 1, "catalog loaded")
-            except Fail:
-                log("manager.log:\n" + vm.read("/tmp/openmpc-pm/manager.log")[-3000:]); log("fixture requests:\n" + fx.requests()[-1500:])
-                raise
-            if settled(vm, instance): break
-            if attempt == SETTLE_TRIES: raise Fail("MPC's audio watchdog killed MPC after the Manager opened, %d times in a row" % attempt)
+        open_manager(vm)
+        try: st = vm.state(60, lambda s: s.get("loaded") == 1 and s.get("online") == 1, "catalog loaded")
+        except Fail:
+            log("manager.log:\n" + vm.read("/tmp/openmpc-pm/manager.log")[-3000:]); log("fixture requests:\n" + fx.requests()[-1500:])
+            raise
         if st["version"] != VERSION_A: raise Fail("the running Manager says version %s" % st["version"])
         vm.shot(os.path.join(vm.dir, "ready.png"))
         vm.savevm("ready")
