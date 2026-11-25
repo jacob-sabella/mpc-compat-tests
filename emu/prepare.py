@@ -140,6 +140,33 @@ def open_plugin(vm, plugin="Plugin Manager", vendor="OpenMPC", done=None, secs=4
         raise
 
 
+# Gen1: what is running in the guest, twice a second: MPC's realtime threads (its audio threads among them) and every task running
+# or blocked in the kernel (R, D), with its wait channel and CPU time, and the guest's CPU counters. Started before the ready
+# snapshot is saved, so it runs from the instant each restore resumes; run.py keeps its tail where MPC's watchdog fired.
+THREADS = "/tmp/pm-threads.log"
+SAMPLE_SH = r"""while :; do
+  up=$(cut -d' ' -f1 /proc/uptime)
+  echo "T $up $(head -n 1 /proc/stat)"
+  awk -v up="$up" -v mpc=" $(pidof MPC) " '{
+    l = $0; c = l; sub(/^[0-9]+ [(]/, "", c); sub(/[)] .*/, "", c); sub(/.*[)] /, "", l); split(l, a, " ")
+    split(FILENAME, f, "/"); pid = f[3]; tid = f[5]
+    if ((index(mpc, " " pid " ") && a[39] + 0) || a[1] == "R" || a[1] == "D") {
+      w = ""; wf = "/proc/" pid "/task/" tid "/wchan"; getline w < wf; close(wf)
+      print up, pid, tid, c, a[1], a[38], a[12] + a[13], w
+    }
+  }' /proc/[0-9]*/task/[0-9]*/stat 2>/dev/null
+  sleep 0.5
+done
+"""
+
+
+def start_sampler(vm):
+    """The sampler above, unless the guest (a restore of a snapshot that has it) is running it already."""
+    vm.sh("cat > /tmp/pm-sample.sh", input=SAMPLE_SH.encode(), check=False)
+    vm.sh("kill -0 $(cat /tmp/pm-sample.pid 2>/dev/null) 2>/dev/null && exit 0; "    # not pgrep -f: this command's own line would match
+          "setsid sh /tmp/pm-sample.sh >>%s 2>&1 </dev/null & echo $! > /tmp/pm-sample.pid" % THREADS, check=False)
+
+
 def prepare(instance, stage="work", fx=None, minfo=None):
     """From the machine snapshot (machine.py; made first if it is missing or out of date), install the Manager build `stage` and leave
     a "ready" snapshot in that stage. Returns what a test needs to know about the machine."""
@@ -169,6 +196,7 @@ def prepare(instance, stage="work", fx=None, minfo=None):
         if st["version"] != VERSION_A: raise Fail("the running Manager says version %s" % st["version"])
         vm.shot(os.path.join(vm.dir, "ready.png"))
         kills = int(vm.out("journalctl -b --no-pager | grep -c 'killing thread by force' || true").strip() or 0)
+        if minfo["arch"] != "aarch64": start_sampler(vm); time.sleep(2)
         vm.savevm("ready")
         info = {k: minfo[k] for k in ("arch", "synths", "external_plugins", "boot_seconds", "mpc_seconds", "firmware")}
         info.update(machine=minfo["id"], prepare_seconds=int(time.time() - t0), kills=kills)   # run.py restored(): kills in the snapshot's journal

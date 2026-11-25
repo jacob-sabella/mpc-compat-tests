@@ -231,15 +231,7 @@ def audio_stall(out):
     return False
 
 
-# Gen1: what MPC's realtime threads (its audio threads among them) are doing, twice a second, so that a run where MPC's audio watchdog
-# kills MPC shows where its audio thread was: running (state R, CPU time rising), waiting on a lock (S, futex_wait_queue) or on the
-# kernel (D). One awk per sample over /proc/<MPC>/task/*/stat; ends with the guest. Kept as end-pm-threads.log.
-THREADS = "/tmp/pm-threads.log"
-SAMPLER = ("setsid sh -c 'while :; do p=$(pidof MPC); [ -n \"$p\" ] && awk -v up=\"$(cut -d\" \" -f1 /proc/uptime)\" "
-           "\"{l=\\$0; c=l; sub(/^[0-9]+ [(]/,\\\"\\\",c); sub(/[)] .*/,\\\"\\\",c); sub(/.*[)] /,\\\"\\\",l); n=split(l,a,\\\" \\\"); "
-           "if (a[39]+0) {split(FILENAME,f,\\\"/\\\"); w=\\\"\\\"; getline w < (\\\"/proc/\\\" f[3] \\\"/task/\\\" f[5] \\\"/wchan\\\"); "
-           "print up, f[5], c, a[1], a[38], a[12]+a[13], w}}\" /proc/$p/task/*/stat 2>/dev/null; sleep 0.5; done' "
-           ">%s 2>&1 </dev/null &" % THREADS)
+THREADS = prepare.THREADS
 
 
 def run_one(instance, label, sc, info, fx, snapshot="ready", tclass=T, logs=(PM + "/device.txt", PM + "/manager.log", PM + "/apply.log", PM + "/result", THREADS)):
@@ -270,8 +262,9 @@ def run_one(instance, label, sc, info, fx, snapshot="ready", tclass=T, logs=(PM 
 RESTORE_CHECK, RESTORES = 8, 5
 
 
-def restored(instance, label, snapshot, info):
-    """A started VM from `snapshot`, and how many restores it took."""
+def restored(instance, label, snapshot, info, keep=None):
+    """A started VM from `snapshot`, and how many restores it took. Where MPC's watchdog fired, the sampler's last samples and the
+    journal's last lines go to `keep`-<n>.log first."""
     for n in range(1, RESTORES + 1):
         vm = emu.VM(instance, label)
         try:
@@ -284,6 +277,12 @@ def restored(instance, label, snapshot, info):
             raise
         if kills <= info.get("kills", 0) or n == RESTORES: return vm, n
         log("%s: MPC's audio watchdog fired just after restore %d of the %s snapshot; restoring again" % (instance, n, snapshot))
+        if keep:
+            try:
+                txt = vm.out("tail -n 1500 %s; echo '--- journal'; journalctl -b --no-pager -o short-monotonic -n 80 2>&1" % THREADS)
+                os.makedirs(os.path.dirname(keep), exist_ok=True)
+                open("%s-%d.log" % (keep, n), "w").write(txt)
+            except Exception as e: log("could not keep the samples: %s" % e)
         vm.kill()
 
 
@@ -294,8 +293,9 @@ def run_attempt(instance, label, sc, info, fx, snapshot, tclass, logs):
     t0 = time.time(); t = None; restores = 1
     try:
         fx.catalog()
-        vm, restores = restored(instance, label, snapshot, info)
-        if info.get("arch") != "aarch64": vm.sh(SAMPLER, check=False)
+        vm, restores = restored(instance, label, snapshot, info, os.path.join(HERE, "results", instance, label, "restore-kills",
+                                                                         "%s-%s" % (sc.__name__, time.strftime("%H%M%S"))))
+        if info.get("arch") != "aarch64": prepare.start_sampler(vm)
         t = tclass(vm, fx, info, out)
         sc(t)
         problems = t.problems
