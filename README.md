@@ -11,43 +11,32 @@ beside this repository (or named by `PM`, `QENGINE` and `MPC_VST`): `emu/build.s
 
 The emulation is [QEngine](https://github.com/Peyton-C/QEngine), by [Peyton Cashin (Peyton-C)](https://github.com/Peyton-C) and [contributors](https://github.com/Peyton-C/QEngine/graphs/contributors). These tests would not exist without it.
 
-## Latest results
+## Results
 
-**[Open the full report](https://open-mpc.github.io/mpc-compat-tests/)**: 141 of 141 checks passed on 2026-11-21.
-
-| Machine | Passed |
-|---|---|
-| MPC Live III, MPC OS 3.10.1 | 25 of 25 |
-| MPC Live III, MPC OS 3.10.0 | 25 of 25 |
-| MPC One, MPC OS 3.10.1 | 25 of 25 |
-| MPC X, MPC OS 3.9.1 | 25 of 25 |
-| MPC One, MPC OS 3.9.1 | 25 of 25 |
-| MPC Sample 1.3.0 | 16 of 16 |
-
-These ran under emulation on a desktop, not on real hardware. They combine three runs: 95 checks from a full run, 28 addin checks
-rerun after an installer fix, and 18 install checks rerun on the final rebased code.
+[The report](https://open-mpc.github.io/mpc-compat-tests/) shows the newest result for every scenario on every machine. The tests run
+under emulation, not on real hardware.
 
 ## Running it
 
 Every four hours the **compat** workflow checks the code under test (`target.json`: the Manager's and the installers' branches)
-and runs the cells with no result on its current commits (`plan.py rolling`), at most six jobs of 45 to 60 minutes, one machine
-each; the rest wait for the next run. When neither branch has moved since every cell ran, it runs nothing: quiet branches, quiet
-schedule. A new scenario in the harness, or a machine added to `machines.json`, is a cell with no result, so it runs too.
+and runs the cells that have no result on their current commits (`plan.py rolling`). It starts at most six jobs, one machine each,
+of 45 to 60 minutes; whatever does not fit waits for the next run. If neither branch has moved since every cell ran, it starts no
+jobs. A new scenario in the harness, or a machine added to `machines.json`, has no result yet, so it runs on the next schedule.
 
-Actions > **compat** > Run workflow runs every scenario instead (or the machines and scenarios named in the inputs; or, with
-*rolling*, what the schedule would). Empty refs mean `target.json`'s. A full run is for new firmware, or before a release.
+Actions > **compat** > Run workflow runs each machine's smoke list from `machines.json` by default, every scenario with suite
+*full*, or the machines and scenarios named in the inputs. With *rolling* it runs what the schedule would. Empty refs mean
+`target.json`'s. Use a full run for new firmware or before a release.
 
-Either way, each machine's scenarios are split into jobs (`plan.py`, balanced by the desktop timings in `timings.json`), and the
-report job adds their results to the ledger (`ledger/`), remakes the page from the whole ledger (`docs/`, served by Pages) and
-commits both to `main`.
+Each machine's scenarios are split into jobs (`plan.py`, balanced by the desktop timings in `timings.json`). The report job adds the
+results to the ledger (`ledger/`), rebuilds the page from the whole ledger (`docs/`, served by Pages) and commits both to `main`.
 
 ## The ledger
 
-`ledger.py` keeps every scenario result as a record: the machine, the outcome, when, and the commits of the Manager, the installers
-and QEngine it ran. `report.py` makes the page from the ledger: each cell is the newest result for that scenario on that machine,
-with its age and the last few results before it, marked when it ran code other than the commit under test (`--pm`, `--mpc-vst`), when
-its commit was not recorded, or when it both passed and failed on the same code (flaky). So the page can be made from many small
-runs instead of one full one.
+`ledger.py` keeps every scenario result as a record: the machine, the outcome, when it ran, and the commits of the Manager, the
+installers and QEngine. `report.py` builds the page from the ledger, so many small runs add up to one report. Each cell is the
+newest result for that scenario on that machine, with its age and the few results before it. A cell is marked when it ran a commit
+other than the one under test (`--pm`, `--mpc-vst`), when its commit was not recorded, or when it both passed and failed on the
+same code (flaky).
 
 ```
 python3 ledger.py add emu/results --pm ../plugin-manager --mpc-vst ../mpc-vst-plugins --qengine ../QEngine   # a local run
@@ -56,8 +45,8 @@ python3 ledger.py show --scenario self_update
 python3 report.py --pm open-mpc/plugin-manager@main             # out/site/index.html
 ```
 
-Adding is idempotent: what is already in the ledger is not added again. The ledger is `ledger/` (records/ by month, one file per run;
-shots/, the screen captures, which `ledger.py prune-shots` trims to the latest result of each cell).
+Adding the same results twice adds nothing. `ledger/records/` holds one file per run, by month; `ledger/shots/` holds the screen
+captures, and `ledger.py prune-shots` keeps only those of each cell's newest result.
 
 ## Prebuilt machines
 
