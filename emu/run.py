@@ -437,7 +437,7 @@ def main():
     ap.add_argument("--only", metavar="NAME", help="with --worker: the scenario")
     ap.add_argument("--merge", metavar="ROOT", help="write summary.json from the workers' results in ROOT (jobs.py)")
     a = ap.parse_args()
-    import run, scenarios, sample, sample_scenarios, routes   # noqa: they register with the module named run, which is not this one when run as a script
+    import run, scenarios, sample, sample_scenarios, routes, modeslot   # noqa: they register with the module named run, which is not this one when run as a script
     kind = "sample" if sample.is_sample(a.instance) else "manager"
     SCENARIOS[:] = run.SAMPLE_SCENARIOS if kind == "sample" else run.SCENARIOS
     todo = [s for s in SCENARIOS if not a.k or any(k in s.__name__ for k in a.k)]

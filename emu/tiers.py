@@ -60,9 +60,9 @@ def main():
         if f not in harness and NO_EMU.search(f): continue
         if MANAGER.match(f):
             print("%s: the Manager's scenarios" % f, file=sys.stderr); inst.update(QUICK); scen.update(mgr)
-        elif f in ("emu/scenarios.py", "emu/routes.py", "emu/sample_scenarios.py"):
+        elif f in ("emu/scenarios.py", "emu/modeslot.py", "emu/routes.py", "emu/sample_scenarios.py"):
             fns = changed_functions(f, href)
-            deco = {"emu/scenarios.py": "scenario", "emu/routes.py": "route", "emu/sample_scenarios.py": "sample_scenario"}[f]
+            deco = {"emu/scenarios.py": "scenario", "emu/modeslot.py": "scenario", "emu/routes.py": "route", "emu/sample_scenarios.py": "sample_scenario"}[f]
             own = names(f, deco)
             if fns is None or set(fns) - set(own): return full("%s: more than its scenarios changed" % f)
             print("%s: %s" % (f, " ".join(fns)), file=sys.stderr)

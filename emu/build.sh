@@ -133,6 +133,15 @@ mkdir -p "$out/cache/go"
 docker run --rm -u "$U" -v "$MV/tools/desktop":/src:ro -v "$fx":/o -v "$out/cache/go":/go -e GOPATH=/go -e GOCACHE=/go/cache -e GOFLAGS=-mod=mod \
     -e CGO_ENABLED=0 -e GOOS=linux -e GOARCH=amd64 -w /src golang:1.26 go build -trimpath -ldflags "-X main.version=emu" -o /o/mpc-installer .
 MPC_VST="$MV" python3 "$here/fixture.py" "$out" "$label" $VA $VB
+# the published Plugin Manager app (modeslot.py), as released
+APP=https://github.com/open-mpc/plugin-manager/releases/download/plugin-manager-app-v2.1.0
+mkdir -p "$out/cache"
+for p in armv7:3bcec66f1f136a34fc42982b905d262c0b722af6e592fe718a9bb5a4f35a443b aarch64:abe34734675f941f2fcbacbf292491d0477b569fb969af231d285dbfc645ff3c; do
+    n="Plugin-Manager-App-2.1.0-mpc-${p%:*}.zip"; az="$out/cache/$n"
+    [ -f "$az" ] || curl -fsSL -o "$az" "$APP/$n"
+    echo "${p#*:}  $az" | sha256sum -c --quiet - || { echo "$n is not the published 2.1.0" >&2; rm -f "$az"; exit 1; }
+    cp "$az" "$fx/"
+done
 # what full_disk fills a drive with (src/fill.c): served beside the zips, not in any catalog
 for arch in armv7 aarch64; do cp "$out/fixture-work/$arch/pm-fill" "$fx/pm-fill-$arch"; done
 git -C "$pm" rev-parse ${ref:-HEAD} > "$fx/commit" 2>/dev/null || true

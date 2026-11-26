@@ -104,7 +104,7 @@ jobs:
         run: |
           clone() { git clone -q --filter=blob:none "https://github.com/${1%@*}" "$2" && git -C "$2" checkout -q "${1#*@}"; }
           clone "$PMS" plugin-manager; clone "$VSTS" mpc-vst-plugins
-          echo "BUILD_KEY=build-$(git -C plugin-manager rev-parse HEAD)-$(git -C mpc-vst-plugins rev-parse HEAD)" >> "$GITHUB_ENV"
+          echo "BUILD_KEY=build-$(git -C plugin-manager rev-parse HEAD)-$(git -C mpc-vst-plugins rev-parse HEAD)-$(sha256sum compat/emu/build.sh compat/emu/fixture.py | sha256sum | cut -c1-12)" >> "$GITHUB_ENV"
       # The same two commits built before: the result is reused as it is (the Manager and the fixture only, no firmware).
       - id: built
         uses: actions/cache@v4

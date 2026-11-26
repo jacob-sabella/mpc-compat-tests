@@ -24,7 +24,7 @@ def scenarios():
     """The scenarios each kind of machine runs, in the order they are written."""
     read = lambda f, deco: re.findall(r"^@%s\ndef (\w+)" % deco, open(os.path.join(HERE, "emu", f)).read(), re.M)
     routes = read("routes.py", "route")
-    return {"manager": read("scenarios.py", "scenario") + routes, "sample": read("sample_scenarios.py", "sample_scenario") + routes}
+    return {"manager": read("scenarios.py", "scenario") + read("modeslot.py", "scenario") + routes, "sample": read("sample_scenarios.py", "sample_scenario") + routes}
 
 
 def cost(times, inst, s):
