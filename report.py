@@ -53,7 +53,7 @@ def harness_scenarios():
     try:
         read = lambda f, deco: re.findall(r"^@%s\ndef (\w+)" % deco, open(os.path.join(HARNESS, f)).read(), re.M)
         routes = read("routes.py", "route")
-        return {"manager": read("scenarios.py", "scenario") + routes, "sample": read("sample_scenarios.py", "sample_scenario") + routes}
+        return {"manager": read("scenarios.py", "scenario") + read("modeslot.py", "scenario") + routes, "sample": read("sample_scenarios.py", "sample_scenario") + routes}
     except OSError: return None
 
 

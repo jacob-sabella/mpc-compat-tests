@@ -84,6 +84,7 @@ environment, and what the screen shows.
 | `readonly_addins` | `/data/mpc-addins` read-only: an addin is refused before MPC stops, a plugin still installs |
 | `catalog_retry` | the catalog cannot be fetched at first; the Manager tries again on its own |
 | `vst2_plugin_json` | the MPC OS 3.10.1 install path: `VST2 Plugins` and a correct plugin.json (on older firmware the switch is written into MPC.settings) |
+| `modeslot_app` | the published Plugin Manager app zip (`modeslot.py`): MENU tile and page on MPC OS 3.10.1, a clean refusal elsewhere, removal |
 
 The MPC Sample (`mpc-sample-130`, AC50, built with `--product-code AC50 --firmware $FIRMWARE_DIR/MPC_SAMPLE_1.3.0_UPDATE.exe`, and
 `mpc-sample-140` from `MPC_Sample_1.4.0_Updater.exe`) has no plugin browser, so it runs its own scenarios instead (`sample_scenarios.py`, machine in `sample.py`): `sample_install`, `sample_plugin_loads`,
