@@ -1,5 +1,5 @@
 {
- "made": "2026-11-28T00:41:57Z",
+ "made": "2026-11-28T08:42:49Z",
  "target": {
   "pm": "b598574f7cb77554f04e513f7f1ca7fd67d67f4f",
   "mpc_vst": "186718df51cddce58b607988171bd2dce3bb2ae5"
@@ -152,12 +152,12 @@
    "instance": "mpc-g1-3101",
    "scenario": "addin_install_remove",
    "ok": true,
-   "at": "2026-11-26T14:45:54Z",
-   "pm": "956ad7e42bb6e8c2cb34ece8d02e1b74d057332a",
-   "mpc_vst": "c4f8b7d613584f2bc6d1c10872e31a8508562b26",
-   "current": false,
+   "at": "2026-11-28T08:42:13Z",
+   "pm": "b598574f7cb77554f04e513f7f1ca7fd67d67f4f",
+   "mpc_vst": "186718df51cddce58b607988171bd2dce3bb2ae5",
+   "current": true,
    "flaky": false,
-   "run": "gh-45834913078-1"
+   "run": "gh-46124082095-1"
   },
   {
    "instance": "mpc-g2-3101",
@@ -174,23 +174,23 @@
    "instance": "mpc-g1-391",
    "scenario": "self_update",
    "ok": true,
-   "at": "2026-11-26T14:45:54Z",
-   "pm": "956ad7e42bb6e8c2cb34ece8d02e1b74d057332a",
-   "mpc_vst": "c4f8b7d613584f2bc6d1c10872e31a8508562b26",
-   "current": false,
+   "at": "2026-11-28T08:42:13Z",
+   "pm": "b598574f7cb77554f04e513f7f1ca7fd67d67f4f",
+   "mpc_vst": "186718df51cddce58b607988171bd2dce3bb2ae5",
+   "current": true,
    "flaky": false,
-   "run": "gh-45834913078-1"
+   "run": "gh-46124082095-1"
   },
   {
    "instance": "mpc-x-391",
    "scenario": "self_update",
    "ok": true,
-   "at": "2026-11-27T01:37:33Z",
-   "pm": "9c2fc1a5dd2becbec1a1cf05321f5142b7254aa4",
-   "mpc_vst": "5f6bfa40a630afeca39d6ab9388e83043cefb6c2",
-   "current": false,
+   "at": "2026-11-28T08:42:13Z",
+   "pm": "b598574f7cb77554f04e513f7f1ca7fd67d67f4f",
+   "mpc_vst": "186718df51cddce58b607988171bd2dce3bb2ae5",
+   "current": true,
    "flaky": false,
-   "run": "gh-45918138387-1"
+   "run": "gh-46124082095-1"
   },
   {
    "instance": "mpc-g2-3100",
@@ -262,12 +262,12 @@
    "instance": "mpc-g1-3101",
    "scenario": "long_press",
    "ok": true,
-   "at": "2026-11-26T14:45:54Z",
-   "pm": "956ad7e42bb6e8c2cb34ece8d02e1b74d057332a",
-   "mpc_vst": "c4f8b7d613584f2bc6d1c10872e31a8508562b26",
-   "current": false,
+   "at": "2026-11-28T08:42:13Z",
+   "pm": "b598574f7cb77554f04e513f7f1ca7fd67d67f4f",
+   "mpc_vst": "186718df51cddce58b607988171bd2dce3bb2ae5",
+   "current": true,
    "flaky": false,
-   "run": "gh-45834913078-1"
+   "run": "gh-46124082095-1"
   },
   {
    "instance": "mpc-g2-3101",
@@ -317,12 +317,12 @@
    "instance": "mpc-g1-3101",
    "scenario": "theme_survives_update",
    "ok": true,
-   "at": "2026-11-26T01:21:18Z",
-   "pm": "af5b641f9eead4bb2cbdfd01ca312409b707bb54",
-   "mpc_vst": "10d77a3d93d6ebf72440e596083fe506010a141f",
-   "current": false,
+   "at": "2026-11-28T08:42:13Z",
+   "pm": "b598574f7cb77554f04e513f7f1ca7fd67d67f4f",
+   "mpc_vst": "186718df51cddce58b607988171bd2dce3bb2ae5",
+   "current": true,
    "flaky": false,
-   "run": "gh-45729370554-1"
+   "run": "gh-46124082095-1"
   },
   {
    "instance": "mpc-g2-3101",
@@ -394,23 +394,23 @@
    "instance": "mpc-g1-391",
    "scenario": "exfat_noexec_drive",
    "ok": true,
-   "at": "2026-11-26T14:45:54Z",
-   "pm": "956ad7e42bb6e8c2cb34ece8d02e1b74d057332a",
-   "mpc_vst": "c4f8b7d613584f2bc6d1c10872e31a8508562b26",
-   "current": false,
+   "at": "2026-11-28T08:42:13Z",
+   "pm": "b598574f7cb77554f04e513f7f1ca7fd67d67f4f",
+   "mpc_vst": "186718df51cddce58b607988171bd2dce3bb2ae5",
+   "current": true,
    "flaky": false,
-   "run": "gh-45834913078-1"
+   "run": "gh-46124082095-1"
   },
   {
    "instance": "mpc-x-391",
    "scenario": "exfat_noexec_drive",
    "ok": true,
-   "at": "2026-11-26T01:21:18Z",
-   "pm": "af5b641f9eead4bb2cbdfd01ca312409b707bb54",
-   "mpc_vst": "10d77a3d93d6ebf72440e596083fe506010a141f",
-   "current": false,
+   "at": "2026-11-28T08:42:13Z",
+   "pm": "b598574f7cb77554f04e513f7f1ca7fd67d67f4f",
+   "mpc_vst": "186718df51cddce58b607988171bd2dce3bb2ae5",
+   "current": true,
    "flaky": false,
-   "run": "gh-45729370554-1"
+   "run": "gh-46124082095-1"
   },
   {
    "instance": "mpc-g2-3100",
@@ -515,12 +515,12 @@
    "instance": "mpc-x-391",
    "scenario": "readonly_addins",
    "ok": true,
-   "at": "2026-11-26T01:21:18Z",
-   "pm": "af5b641f9eead4bb2cbdfd01ca312409b707bb54",
-   "mpc_vst": "10d77a3d93d6ebf72440e596083fe506010a141f",
-   "current": false,
+   "at": "2026-11-28T08:42:13Z",
+   "pm": "b598574f7cb77554f04e513f7f1ca7fd67d67f4f",
+   "mpc_vst": "186718df51cddce58b607988171bd2dce3bb2ae5",
+   "current": true,
    "flaky": false,
-   "run": "gh-45729370554-1"
+   "run": "gh-46124082095-1"
   },
   {
    "instance": "mpc-g2-3100",
@@ -537,12 +537,12 @@
    "instance": "mpc-g1-3101",
    "scenario": "readonly_addins",
    "ok": true,
-   "at": "2026-11-27T01:37:33Z",
-   "pm": "9c2fc1a5dd2becbec1a1cf05321f5142b7254aa4",
-   "mpc_vst": "5f6bfa40a630afeca39d6ab9388e83043cefb6c2",
-   "current": false,
+   "at": "2026-11-28T08:42:13Z",
+   "pm": "b598574f7cb77554f04e513f7f1ca7fd67d67f4f",
+   "mpc_vst": "186718df51cddce58b607988171bd2dce3bb2ae5",
+   "current": true,
    "flaky": false,
-   "run": "gh-45918138387-1"
+   "run": "gh-46124082095-1"
   },
   {
    "instance": "mpc-g2-3101",
@@ -559,23 +559,23 @@
    "instance": "mpc-g1-391",
    "scenario": "power_cut_mid_apply",
    "ok": false,
-   "at": "2026-11-26T14:45:54Z",
-   "pm": "956ad7e42bb6e8c2cb34ece8d02e1b74d057332a",
-   "mpc_vst": "c4f8b7d613584f2bc6d1c10872e31a8508562b26",
-   "current": false,
+   "at": "2026-11-28T08:42:13Z",
+   "pm": "b598574f7cb77554f04e513f7f1ca7fd67d67f4f",
+   "mpc_vst": "186718df51cddce58b607988171bd2dce3bb2ae5",
+   "current": true,
    "flaky": false,
-   "run": "gh-45834913078-1"
+   "run": "gh-46124082095-1"
   },
   {
    "instance": "mpc-x-391",
    "scenario": "power_cut_mid_apply",
    "ok": false,
-   "at": "2026-11-27T01:37:33Z",
-   "pm": "9c2fc1a5dd2becbec1a1cf05321f5142b7254aa4",
-   "mpc_vst": "5f6bfa40a630afeca39d6ab9388e83043cefb6c2",
-   "current": false,
+   "at": "2026-11-28T08:42:13Z",
+   "pm": "b598574f7cb77554f04e513f7f1ca7fd67d67f4f",
+   "mpc_vst": "186718df51cddce58b607988171bd2dce3bb2ae5",
+   "current": true,
    "flaky": false,
-   "run": "gh-45918138387-1"
+   "run": "gh-46124082095-1"
   },
   {
    "instance": "mpc-g2-3100",
@@ -614,12 +614,12 @@
    "instance": "mpc-g1-391",
    "scenario": "catalog_retry",
    "ok": true,
-   "at": "2026-11-27T01:37:33Z",
-   "pm": "9c2fc1a5dd2becbec1a1cf05321f5142b7254aa4",
-   "mpc_vst": "5f6bfa40a630afeca39d6ab9388e83043cefb6c2",
-   "current": false,
+   "at": "2026-11-28T08:42:13Z",
+   "pm": "b598574f7cb77554f04e513f7f1ca7fd67d67f4f",
+   "mpc_vst": "186718df51cddce58b607988171bd2dce3bb2ae5",
+   "current": true,
    "flaky": false,
-   "run": "gh-45918138387-1"
+   "run": "gh-46124082095-1"
   },
   {
    "instance": "mpc-x-391",
@@ -647,12 +647,12 @@
    "instance": "mpc-g1-3101",
    "scenario": "catalog_retry",
    "ok": true,
-   "at": "2026-11-26T14:45:54Z",
-   "pm": "956ad7e42bb6e8c2cb34ece8d02e1b74d057332a",
-   "mpc_vst": "c4f8b7d613584f2bc6d1c10872e31a8508562b26",
-   "current": false,
+   "at": "2026-11-28T08:42:13Z",
+   "pm": "b598574f7cb77554f04e513f7f1ca7fd67d67f4f",
+   "mpc_vst": "186718df51cddce58b607988171bd2dce3bb2ae5",
+   "current": true,
    "flaky": false,
-   "run": "gh-45834913078-1"
+   "run": "gh-46124082095-1"
   },
   {
    "instance": "mpc-g2-3101",
@@ -735,12 +735,12 @@
    "instance": "mpc-x-391",
    "scenario": "modeslot_app",
    "ok": true,
-   "at": "2026-11-27T01:37:33Z",
-   "pm": "9c2fc1a5dd2becbec1a1cf05321f5142b7254aa4",
-   "mpc_vst": "5f6bfa40a630afeca39d6ab9388e83043cefb6c2",
-   "current": false,
+   "at": "2026-11-28T08:42:13Z",
+   "pm": "b598574f7cb77554f04e513f7f1ca7fd67d67f4f",
+   "mpc_vst": "186718df51cddce58b607988171bd2dce3bb2ae5",
+   "current": true,
    "flaky": false,
-   "run": "gh-45918138387-1"
+   "run": "gh-46124082095-1"
   },
   {
    "instance": "mpc-g2-3100",
@@ -756,13 +756,13 @@
   {
    "instance": "mpc-g1-3101",
    "scenario": "modeslot_app",
-   "ok": false,
-   "at": "2026-11-27T01:37:33Z",
-   "pm": "9c2fc1a5dd2becbec1a1cf05321f5142b7254aa4",
-   "mpc_vst": "5f6bfa40a630afeca39d6ab9388e83043cefb6c2",
-   "current": false,
+   "ok": true,
+   "at": "2026-11-28T08:42:13Z",
+   "pm": "b598574f7cb77554f04e513f7f1ca7fd67d67f4f",
+   "mpc_vst": "186718df51cddce58b607988171bd2dce3bb2ae5",
+   "current": true,
    "flaky": false,
-   "run": "gh-45918138387-1"
+   "run": "gh-46124082095-1"
   },
   {
    "instance": "mpc-g2-3101",
@@ -812,12 +812,12 @@
    "instance": "mpc-g1-3101",
    "scenario": "zip_install_by_hand",
    "ok": true,
-   "at": "2026-11-26T14:45:54Z",
-   "pm": "956ad7e42bb6e8c2cb34ece8d02e1b74d057332a",
-   "mpc_vst": "c4f8b7d613584f2bc6d1c10872e31a8508562b26",
-   "current": false,
+   "at": "2026-11-28T08:42:13Z",
+   "pm": "b598574f7cb77554f04e513f7f1ca7fd67d67f4f",
+   "mpc_vst": "186718df51cddce58b607988171bd2dce3bb2ae5",
+   "current": true,
    "flaky": false,
-   "run": "gh-45834913078-1"
+   "run": "gh-46124082095-1"
   },
   {
    "instance": "mpc-g2-3101",
@@ -889,12 +889,12 @@
    "instance": "mpc-g1-3101",
    "scenario": "zip_install_by_hand_t",
    "ok": true,
-   "at": "2026-11-26T14:45:54Z",
-   "pm": "956ad7e42bb6e8c2cb34ece8d02e1b74d057332a",
-   "mpc_vst": "c4f8b7d613584f2bc6d1c10872e31a8508562b26",
-   "current": false,
+   "at": "2026-11-28T08:42:13Z",
+   "pm": "b598574f7cb77554f04e513f7f1ca7fd67d67f4f",
+   "mpc_vst": "186718df51cddce58b607988171bd2dce3bb2ae5",
+   "current": true,
    "flaky": false,
-   "run": "gh-45834913078-1"
+   "run": "gh-46124082095-1"
   },
   {
    "instance": "mpc-g2-3101",
@@ -966,12 +966,12 @@
    "instance": "mpc-g1-3101",
    "scenario": "zip_addin_by_hand",
    "ok": true,
-   "at": "2026-11-26T01:21:18Z",
-   "pm": "af5b641f9eead4bb2cbdfd01ca312409b707bb54",
-   "mpc_vst": "10d77a3d93d6ebf72440e596083fe506010a141f",
-   "current": false,
+   "at": "2026-11-28T08:42:13Z",
+   "pm": "b598574f7cb77554f04e513f7f1ca7fd67d67f4f",
+   "mpc_vst": "186718df51cddce58b607988171bd2dce3bb2ae5",
+   "current": true,
    "flaky": false,
-   "run": "gh-45729370554-1"
+   "run": "gh-46124082095-1"
   },
   {
    "instance": "mpc-g2-3101",
@@ -1010,12 +1010,12 @@
    "instance": "mpc-g1-391",
    "scenario": "store_install_update_remove",
    "ok": true,
-   "at": "2026-11-26T14:45:54Z",
-   "pm": "956ad7e42bb6e8c2cb34ece8d02e1b74d057332a",
-   "mpc_vst": "c4f8b7d613584f2bc6d1c10872e31a8508562b26",
-   "current": false,
+   "at": "2026-11-28T08:42:13Z",
+   "pm": "b598574f7cb77554f04e513f7f1ca7fd67d67f4f",
+   "mpc_vst": "186718df51cddce58b607988171bd2dce3bb2ae5",
+   "current": true,
    "flaky": false,
-   "run": "gh-45834913078-1"
+   "run": "gh-46124082095-1"
   },
   {
    "instance": "mpc-x-391",
@@ -1043,12 +1043,12 @@
    "instance": "mpc-g1-3101",
    "scenario": "store_install_update_remove",
    "ok": true,
-   "at": "2026-11-26T01:21:18Z",
-   "pm": "af5b641f9eead4bb2cbdfd01ca312409b707bb54",
-   "mpc_vst": "10d77a3d93d6ebf72440e596083fe506010a141f",
-   "current": false,
+   "at": "2026-11-28T08:42:13Z",
+   "pm": "b598574f7cb77554f04e513f7f1ca7fd67d67f4f",
+   "mpc_vst": "186718df51cddce58b607988171bd2dce3bb2ae5",
+   "current": true,
    "flaky": false,
-   "run": "gh-45729370554-1"
+   "run": "gh-46124082095-1"
   },
   {
    "instance": "mpc-g2-3101",
@@ -1087,12 +1087,12 @@
    "instance": "mpc-g1-391",
    "scenario": "store_install_update_remove_t",
    "ok": true,
-   "at": "2026-11-26T14:45:54Z",
-   "pm": "956ad7e42bb6e8c2cb34ece8d02e1b74d057332a",
-   "mpc_vst": "c4f8b7d613584f2bc6d1c10872e31a8508562b26",
-   "current": false,
+   "at": "2026-11-28T08:42:13Z",
+   "pm": "b598574f7cb77554f04e513f7f1ca7fd67d67f4f",
+   "mpc_vst": "186718df51cddce58b607988171bd2dce3bb2ae5",
+   "current": true,
    "flaky": false,
-   "run": "gh-45834913078-1"
+   "run": "gh-46124082095-1"
   },
   {
    "instance": "mpc-x-391",
@@ -1120,12 +1120,12 @@
    "instance": "mpc-g1-3101",
    "scenario": "store_install_update_remove_t",
    "ok": true,
-   "at": "2026-11-28T00:41:41Z",
+   "at": "2026-11-28T08:42:13Z",
    "pm": "b598574f7cb77554f04e513f7f1ca7fd67d67f4f",
    "mpc_vst": "186718df51cddce58b607988171bd2dce3bb2ae5",
    "current": true,
    "flaky": false,
-   "run": "gh-46086123986-1"
+   "run": "gh-46124082095-1"
   },
   {
    "instance": "mpc-g2-3101",
@@ -1241,23 +1241,23 @@
    "instance": "mpc-g1-391",
    "scenario": "store_dependency",
    "ok": true,
-   "at": "2026-11-26T14:45:54Z",
-   "pm": "956ad7e42bb6e8c2cb34ece8d02e1b74d057332a",
-   "mpc_vst": "c4f8b7d613584f2bc6d1c10872e31a8508562b26",
-   "current": false,
+   "at": "2026-11-28T08:42:13Z",
+   "pm": "b598574f7cb77554f04e513f7f1ca7fd67d67f4f",
+   "mpc_vst": "186718df51cddce58b607988171bd2dce3bb2ae5",
+   "current": true,
    "flaky": false,
-   "run": "gh-45834913078-1"
+   "run": "gh-46124082095-1"
   },
   {
    "instance": "mpc-x-391",
    "scenario": "store_dependency",
    "ok": true,
-   "at": "2026-11-27T01:37:33Z",
-   "pm": "9c2fc1a5dd2becbec1a1cf05321f5142b7254aa4",
-   "mpc_vst": "5f6bfa40a630afeca39d6ab9388e83043cefb6c2",
-   "current": false,
+   "at": "2026-11-28T08:42:13Z",
+   "pm": "b598574f7cb77554f04e513f7f1ca7fd67d67f4f",
+   "mpc_vst": "186718df51cddce58b607988171bd2dce3bb2ae5",
+   "current": true,
    "flaky": false,
-   "run": "gh-45918138387-1"
+   "run": "gh-46124082095-1"
   },
   {
    "instance": "mpc-g2-3100",
@@ -1351,12 +1351,12 @@
    "instance": "mpc-g1-3101",
    "scenario": "store_addin_install_remove",
    "ok": true,
-   "at": "2026-11-26T14:45:54Z",
-   "pm": "956ad7e42bb6e8c2cb34ece8d02e1b74d057332a",
-   "mpc_vst": "c4f8b7d613584f2bc6d1c10872e31a8508562b26",
-   "current": false,
+   "at": "2026-11-28T08:42:13Z",
+   "pm": "b598574f7cb77554f04e513f7f1ca7fd67d67f4f",
+   "mpc_vst": "186718df51cddce58b607988171bd2dce3bb2ae5",
+   "current": true,
    "flaky": false,
-   "run": "gh-45834913078-1"
+   "run": "gh-46124082095-1"
   },
   {
    "instance": "mpc-g2-3101",
@@ -1395,12 +1395,12 @@
    "instance": "mpc-g1-391",
    "scenario": "store_sync_prune",
    "ok": true,
-   "at": "2026-11-26T14:45:54Z",
-   "pm": "956ad7e42bb6e8c2cb34ece8d02e1b74d057332a",
-   "mpc_vst": "c4f8b7d613584f2bc6d1c10872e31a8508562b26",
-   "current": false,
+   "at": "2026-11-28T08:42:13Z",
+   "pm": "b598574f7cb77554f04e513f7f1ca7fd67d67f4f",
+   "mpc_vst": "186718df51cddce58b607988171bd2dce3bb2ae5",
+   "current": true,
    "flaky": false,
-   "run": "gh-45834913078-1"
+   "run": "gh-46124082095-1"
   },
   {
    "instance": "mpc-x-391",
@@ -1472,12 +1472,12 @@
    "instance": "mpc-g1-391",
    "scenario": "store_device_limited",
    "ok": true,
-   "at": "2026-11-26T14:45:54Z",
-   "pm": "956ad7e42bb6e8c2cb34ece8d02e1b74d057332a",
-   "mpc_vst": "c4f8b7d613584f2bc6d1c10872e31a8508562b26",
-   "current": false,
+   "at": "2026-11-28T08:42:13Z",
+   "pm": "b598574f7cb77554f04e513f7f1ca7fd67d67f4f",
+   "mpc_vst": "186718df51cddce58b607988171bd2dce3bb2ae5",
+   "current": true,
    "flaky": false,
-   "run": "gh-45834913078-1"
+   "run": "gh-46124082095-1"
   },
   {
    "instance": "mpc-x-391",
@@ -1505,12 +1505,12 @@
    "instance": "mpc-g1-3101",
    "scenario": "store_device_limited",
    "ok": true,
-   "at": "2026-11-27T01:37:33Z",
-   "pm": "9c2fc1a5dd2becbec1a1cf05321f5142b7254aa4",
-   "mpc_vst": "5f6bfa40a630afeca39d6ab9388e83043cefb6c2",
-   "current": false,
+   "at": "2026-11-28T08:42:13Z",
+   "pm": "b598574f7cb77554f04e513f7f1ca7fd67d67f4f",
+   "mpc_vst": "186718df51cddce58b607988171bd2dce3bb2ae5",
+   "current": true,
    "flaky": false,
-   "run": "gh-45918138387-1"
+   "run": "gh-46124082095-1"
   },
   {
    "instance": "mpc-g2-3101",
@@ -1549,12 +1549,12 @@
    "instance": "mpc-g1-391",
    "scenario": "desktop_install_update_remove",
    "ok": true,
-   "at": "2026-11-26T14:45:54Z",
-   "pm": "956ad7e42bb6e8c2cb34ece8d02e1b74d057332a",
-   "mpc_vst": "c4f8b7d613584f2bc6d1c10872e31a8508562b26",
-   "current": false,
+   "at": "2026-11-28T08:42:13Z",
+   "pm": "b598574f7cb77554f04e513f7f1ca7fd67d67f4f",
+   "mpc_vst": "186718df51cddce58b607988171bd2dce3bb2ae5",
+   "current": true,
    "flaky": false,
-   "run": "gh-45834913078-1"
+   "run": "gh-46124082095-1"
   },
   {
    "instance": "mpc-x-391",
@@ -1659,12 +1659,12 @@
    "instance": "mpc-g1-3101",
    "scenario": "desktop_addin_install_remove",
    "ok": true,
-   "at": "2026-11-26T14:45:54Z",
-   "pm": "956ad7e42bb6e8c2cb34ece8d02e1b74d057332a",
-   "mpc_vst": "c4f8b7d613584f2bc6d1c10872e31a8508562b26",
-   "current": false,
+   "at": "2026-11-28T08:42:13Z",
+   "pm": "b598574f7cb77554f04e513f7f1ca7fd67d67f4f",
+   "mpc_vst": "186718df51cddce58b607988171bd2dce3bb2ae5",
+   "current": true,
    "flaky": false,
-   "run": "gh-45834913078-1"
+   "run": "gh-46124082095-1"
   },
   {
    "instance": "mpc-g2-3101",
